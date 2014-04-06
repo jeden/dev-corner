@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Javascript | Developer's Corner]]></title>
   <link href="http://www.developer-corner.com/blog/categories/javascript/atom.xml" rel="self"/>
   <link href="http://www.developer-corner.com/"/>
-  <updated>2014-04-07T00:09:37+02:00</updated>
+  <updated>2014-04-07T00:13:15+02:00</updated>
   <id>http://www.developer-corner.com/</id>
   <author>
     <name><![CDATA[Antonio Bello]]></name>
@@ -12,81 +12,6 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
-  
-  <entry>
-    <title type="html"><![CDATA[Creating a Time Tracking App With Meteor]]></title>
-    <link href="http://www.developer-corner.com/2014/04/time-tracking-app-in-meteor"/>
-    <updated>2014-04-01T09:08:25+02:00</updated>
-    <id>http://www.developer-corner.com/2014/04/time-tracking-app-in-meteor</id>
-    <content type="html"><![CDATA[<p>This is a tutorial for developers meeting Meteor for the first time. We&rsquo;ll develop a simple time tracking application.</p>
-
-<!-- more -->
-
-
-<p>Since this tutorial is to learn how to develop a web app with Meteor, we won&rsquo;t build a list of requirements upfront and implement all features taking into account how each piece of code can be extended to implement other future functionalities. We&rsquo;ll focus on a feature at a time instead, writing the code that&rsquo;s strictly required to make that feature work. Let&rsquo;s say it&rsquo;s a TDD approach, but without the <em>test</em> part, or <a href="http://en.wikipedia.org/wiki/Feature-driven_development"><em>Feature-driven development</em></a> if you prefer.</p>
-
-<h1>What&rsquo;s meteor</h1>
-
-<p>If you are reading this tutorial, I presume you already know what meteor is. The <a href="http://www.meteor.com">official website</a> defines it as</p>
-
-<blockquote><p>an open-source platform for building top-quality web apps in a fraction of the time, whether you&rsquo;re an expert developer or just getting started</p></blockquote>
-
-<p>My own definition istead is:</p>
-
-<blockquote><p>Meteor is the evolution of web development, where the server joins the client, shortcutting their distance, and making <em>reactivity</em> the most predonimant verb</p></blockquote>
-
-<h1>The toolset</h1>
-
-<p>We just need a few tools:</p>
-
-<ul>
-<li>meteor</li>
-<li>an editor (pick your favorite one)</li>
-<li>a browser</li>
-</ul>
-
-
-<p>I expect you to have meteor already installed&hellip; just in case, here&rsquo;s how:</p>
-
-<p><code>console Installing meteor
-curl https://install.meteor.com | /bin/sh
-</code></p>
-
-<p>Once that is done, we&rsquo;re ready to start.</p>
-
-<h1>First steps</h1>
-
-<p>Just to acquire confidence, let&rsquo;s write a simple &ldquo;Hello browser&rdquo; just to be sure that everything is running and is connected.</p>
-
-<p>The first thing to do is creating the meteor app, as simple as opening a terminal, navigating to the desired folder and running</p>
-
-<p><code>console Creating Meteor app
-meteor create time-tracker
-</code></p>
-
-<p>This creates an app skeleton, with just 3 files: <code>css</code>, <code>html</code> and <code>js</code>.  It is already an app that can be run by typing <code>meteor</code>:</p>
-
-<p>```sh Running meteor</p>
-
-<blockquote><p>meteor
-=> Started proxy.
-=> Started MongoDB.   <br/>
-=> Started your app.</p></blockquote>
-
-<p>=> App running at: <a href="http://localhost:3000/">http://localhost:3000/</a>
-```</p>
-
-<p>and accessed by just pointing the browser to <code>http://localhost:3000/</code> (or whatever reported by the meteor log). The expected output is the classical <code>Hello World</code> page</p>
-
-<p><img src="/res/images/time-tracking-app-in-meteor/hello-world.png" alt="Hello World" /></p>
-
-<p>Just to prove it&rsquo;s a dynamic app and not a static html, open up the <code>time-tracker.html</code> page, replace <code>Hello World!</code> with <code>Hello Browser!</code> and save. The page shown in the browser automatically refreshes to reflect the new content, <em>with no need to reload</em>.</p>
-
-<p><img src="/res/images/time-tracking-app-in-meteor/hello-browser.png" alt="Hello Browser" /></p>
-
-<p><blockquote><p>Here it is</p><footer><strong>me</strong> <cite>Him</cite></footer></blockquote></p>
-]]></content>
-  </entry>
   
   <entry>
     <title type="html"><![CDATA[Cloning Dijit Widgets]]></title>
