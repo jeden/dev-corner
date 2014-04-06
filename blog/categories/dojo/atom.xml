@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Dojo | Developer's Corner]]></title>
+  <link href="http://www.developer-corner.com/blog/categories/dojo/atom.xml" rel="self"/>
+  <link href="http://www.developer-corner.com/"/>
+  <updated>2014-04-07T00:09:37+02:00</updated>
+  <id>http://www.developer-corner.com/</id>
+  <author>
+    <name><![CDATA[Antonio Bello]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Cloning Dijit Widgets]]></title>
+    <link href="http://www.developer-corner.com/2011/06/cloning-dijit-widgets"/>
+    <updated>2011-06-06T09:41:00+02:00</updated>
+    <id>http://www.developer-corner.com/2011/06/cloning-dijit-widgets</id>
+    <content type="html"><![CDATA[<p>Dojox and Dijit widgets are undoubtedly cool, bringing a richer user
+experience to your web site.</p>
+
+<p>One of their drawback though is that they are not easily cloneable. A typical
+example is for instance a table with a set of controls per row and a “Add new
+row” button, allowing to add a new row to the table.</p>
+
+<p>This article provides a simple solution to clone a table row containing dijit
+widgets.</p>
+
+<!-- more -->
+
+
+<h1>The problem</h1>
+
+<p>I&rsquo;ve recently started using dojo and dijit to provide some cool user interface
+experience on a project I am working on.</p>
+
+<p>During implementation I&rsquo;ve faced with a problem: I have a table with a set of
+widgets on each row, initially with a single row, but with the user able to
+add as many rows as he needs. Unfortunately <em>there is no (native) way to clone
+a dijit widget</em>, so I had to find a different solution.</p>
+
+<p>I am using the declarative approach of creating dijit widgets, by adding some
+dijit related attributes to input controls and let the dojo parser convert
+them from normal input controls to dijit widgets. For instance, the following
+input textbox:</p>
+
+<p><code>xml
+&lt;input type='text' dojoType='dijit.form.ValidationTextBox' /&gt;
+</code></p>
+
+<p>is parsed by dojo and converted into a ValidationTextBox widget like this:</p>
+
+<p>```xml</p>
+
+<div
+    class="dijit dijitReset dijitInlineTable dijitLeft dijitTextBox dijitValidationTextBox"
+    id="widget_dijit_form_ValidationTextBox_0" role="presentation"
+    dir="ltr" widgetid="dijit_form_ValidationTextBox_0">
+    <div class="dijitReset dijitValidationContainer">
+        <input
+            class="dijitReset dijitInputField dijitValidationIcon dijitValidationInner"
+            value="Χ" type="text" tabindex="-1" readonly="readonly"
+            role="presentation">
+    </div>
+    <div class="dijitReset dijitInputField dijitInputContainer">
+        <input class="dijitReset dijitInputInner"
+            dojoattachpoint="textbox,focusNode" autocomplete="off" type="text"
+            id="dijit_form_ValidationTextBox_0" tabindex="0" value="">
+    </div>
+</div>
+
+
+<p>```</p>
+
+<p>Conversion from html control to dijit widget can be performed either
+automatically, by specifying the <code>djconfig='parseOnLoad:true'</code> parameter when
+loading the dojo script:</p>
+
+<p>``` html</p>
+
+<script
+    type='text/javascript'
+    src='https://ajax.googleapis.com/ajax/libs/dojo/1.6.0/dojo/dojo.xd.js'
+    djconfig='parseOnLoad:true'>
+</script>
+
+
+<p>```</p>
+
+<p>or manually, by calling the <code>dojo.parser.parse()</code> function, most likely in <code>addOnLoad()</code>.</p>
+
+<h1>The solution</h1>
+
+<p>The idea behind the solution I’ve found out can be summarized as follows:</p>
+
+<ol>
+<li> read the table row <strong>before</strong> conversion from input control to dijit widget occurs and save its html code in a safe place</li>
+<li> reuse the table row as a template to clone new table rows, and apply the dojo parsing on it for input to widget conversions</li>
+</ol>
+
+
+<p>In order to work, row cloning must be done <em>before</em> the dojo parsing occurs.</p>
+
+<p>This is the raw html form we’ll work on:</p>
+
+<p>```xml
+<form dojoType='dijit.form.Form' id='form'></p>
+
+<pre><code>&lt;input type='hidden' value='1' id='hRowsCounter' /&gt;
+
+&lt;input type='button' id='btnAddNewRow' value='Add new row'  label='Add new row' dojoType='dijit.form.Button' /&gt;
+
+&lt;table id='table'&gt;
+    &lt;thead&gt;
+        &lt;tr&gt;
+            &lt;td&gt;Quantity&lt;/td&gt;
+            &lt;td&gt;Unit Price&lt;/td&gt;
+    &lt;/thead&gt;
+    &lt;tbody&gt;
+        &lt;tr id="row-1"&gt;
+            &lt;td&gt;&lt;input type='text'  id='editQuantity1' dojoType='dijit.form.NumberSpinner' required='true' /&gt;&lt;/td&gt;
+            &lt;td&gt;&lt;input type='text'  id='editUnitPrice1' dojoType='dijit.form.CurrencyTextBox' required='true' /&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;input type='submit' value='Submit' label='Submit' dojoType='dijit.form.Button'  /&gt;
+</code></pre>
+
+<p></form>
+```</p>
+
+<p>The hidden field is used to keep track of the total number of rows, used both locally to generate the identifiers of the cloned controls and at server side, to let the web application know in advance how many rows to process.</p>
+
+<p>The table row is made up of 2 dijit widgets, <code>NumberSpinner</code> and <code>CurrencyTextBox</code>,  but of course the same principle applies to any other dijit or dojox widget.</p>
+
+<p>This form “as is” is rendered by the browser as a standard html form, not powered by dijit yet, and it should look like the following:</p>
+
+<p><img src="/res/images/2011-06-06-cloning-dijit-widgets/standard_html_form.png" alt="Standard form" /></p>
+
+<p>In order to perform the enhancement, we need some javascript code. First of all, we need to load the dojo library in the <code>&lt;head&gt;</code> section, along with jquery, which I’m going to use as I feel more familiar with:</p>
+
+<p>```xml
+<head></p>
+
+<pre><code>&lt;script
+    type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/dojo/1.6.0/dojo/dojo.xd.js'
+    djconfig='parseOnLoad:false'&gt;
+&lt;/script&gt;
+&lt;script
+    type='text/javascript'
+    src='http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js'&gt;
+&lt;/script&gt;
+</code></pre>
+
+<p></head>
+```</p>
+
+<p>Notice the <code>parseOnLoad</code> parameter explicitly set to false, to prevent automatic dojo parsing of the body, precondition needed for the solution to work. Following the javascript code to enhance the standard html form into a widget based dijit form.</p>
+
+<p>```javascript</p>
+
+<script type='text/javascript'>
+    dojo.require('dijit.form.Form');
+    dojo.require('dijit.form.Button');
+    dojo.require('dijit.form.CurrencyTextBox');
+    dojo.require('dijit.form.NumberSpinner');
+
+    dojo.addOnLoad(function() {
+
+        // Parse the body to convert input controls into dojox/dijit widgets
+        dojo.parser.parse(dojo.body());
+
+        dojo.connect(dijit.byId('btnSubmit'), 'onClick', function(e) {
+            dijit.byId('form').submit();
+        });
+
+        dojo.connect(dijit.byId('form'), 'onSubmit', function(e) {
+            return this.validate();
+        });
+    });
+</script>
+
+
+<p>```</p>
+
+<p>After adding the above code to our page, the form is now visibly different:</p>
+
+<p><img src="/res/images/2011-06-06-cloning-dijit-widgets/enhanced_form.png" alt="Enhanced form" /></p>
+
+<p>The final step is to implement the row addition. First we need to save the row template in the addOnLoad() event, prior to dojo parsing:</p>
+
+<p>```js
+var rowTemplate = null;</p>
+
+<p>dojo.addOnLoad(function() {</p>
+
+<pre><code>// Save the row template
+rowTemplate = $('#row-1').clone();
+
+// Parse the body to convert input controls into dojox/dijit widgets
+dojo.parser.parse(dojo.body());
+
+...
+</code></pre>
+
+<p>});
+```</p>
+
+<p>Next we have to attach a click handler to the “Add new row” button:</p>
+
+<p>```js
+var rowTemplate = null;</p>
+
+<p>dojo.addOnLoad(function() {</p>
+
+<pre><code>// Save the row template
+rowTemplate = $('#row-1').clone();
+
+// Parse the body to convert input controls into dojox/dijit widgets
+dojo.parser.parse(dojo.body());
+
+dojo.connect(dijit.byId('btnSubmit'), 'onClick', function(e) {
+    dijit.byId('form').submit();
+});
+
+dojo.connect(dijit.byId('form'), 'onSubmit', function(e) {
+    return this.validate();
+});
+
+dojo.connect(dijit.byId('btnAddNewRow'), 'onClick', function(e) {
+    addTableRow();
+});
+</code></pre>
+
+<p>});
+```</p>
+
+<p>Last, the missing piece is the actual addTableRow() implementation:</p>
+
+<p>```js
+function addTableRow() {</p>
+
+<pre><code>// Retrieve the rows counter hidden control
+var hRowsCounter = $('#hRowsCounter');
+
+// Calculate the next row index
+var index = parseInt(hRowsCounter.val()) + 1;
+
+// Set the new row id
+var newRowId = 'row-' + index;
+
+// Clone the table row from the previously saved template
+var newRow = rowTemplate.clone().attr('id', newRowId);
+
+// Replace the id of each input control
+newRow.find('input').each(function() {
+    var newId = $(this).attr('id').replace(/[\d]+$/g, index);
+    $(this).val('');
+    $(this).attr('id', newId)
+    $(this).attr('name', newId);
+}).end().appendTo('#table');
+
+// Update the number of rows
+hRowsCounter.val(index);
+
+// Force a dojo parsing of hte newly created row 
+dojo.parser.parse(dojo.byId(newRowId));
+</code></pre>
+
+<p>}
+```</p>
+
+<p>The actual row cloning is done at line 12, with contextual update of the row
+id.</p>
+
+<p>Lines 15 to 20 are used to locate all <code>&lt;input&gt;</code> controls in the newly created
+row and for each one:</p>
+
+<ul>
+<li>calculate a unique control id (line 16)</li>
+<li>reset the control value (line 17)</li>
+<li>set the new control id (line 18)</li>
+<li>set the control name (line 19)</li>
+</ul>
+
+
+<p>The new control id is calculated by replacing the ending numbers in the
+control id with the row number, using a regular expression. If you look at the
+html form code, you’ll see that each control in the table has an id made up of
+a descriptive text (editQuantity) and a number, identifying the row. The
+regular expression locates the ending number, so it can be replaced with the
+new row number. Needless to say, this process is required to ensure that each
+control in the table has a unique id.</p>
+
+<p>Here is the final form, with some rows manually added to the table:</p>
+
+<p><img src="/res/images/2011-06-06-cloning-dijit-widgets/enhanced_form_with_multiple_rows.png" alt="Enhanced form with multiple rows" /></p>
+]]></content>
+  </entry>
+  
+</feed>

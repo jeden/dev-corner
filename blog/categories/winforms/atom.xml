@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Winforms | Developer's Corner]]></title>
+  <link href="http://www.developer-corner.com/blog/categories/winforms/atom.xml" rel="self"/>
+  <link href="http://www.developer-corner.com/"/>
+  <updated>2014-04-07T00:09:37+02:00</updated>
+  <id>http://www.developer-corner.com/</id>
+  <author>
+    <name><![CDATA[Antonio Bello]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[DataGridView: How to Bind Nested Objects]]></title>
+    <link href="http://www.developer-corner.com/2007/07/datagridview-how-to-bind-nested-objects"/>
+    <updated>2007-07-19T06:49:00+02:00</updated>
+    <id>http://www.developer-corner.com/2007/07/datagridview-how-to-bind-nested-objects</id>
+    <content type="html"><![CDATA[<p>The WinForms <code>DatagridView</code> control is not capable of handling nested properties, as it works with base data types only. But implementing such feature is not complicated. Let’s see how.</p>
+
+<!-- more -->
+
+
+<h3>The Problem</h3>
+
+<p>A <code>DataGridView</code> can be bound to a collection of objects to display any of its base data type (i.e. string, int, and so on) properties. For example, a collection of instances of the following class:</p>
+
+<p><code>csharp
+public class Customer
+{
+  public string FirstName { get; set;}
+  public string LastName { get; set;}
+  public string Street { get; set;}
+  public string PostalCode { get; set;}
+  public string City { get; set;}
+}
+</code></p>
+
+<p>can be used to display any of the <code>Customer</code> class properties in the <code>DataGridView</code>.</p>
+
+<p>But what happens when the class exposes other objects which are not base data type? If an <code>Address</code> class is created and used as a property of the <code>Customer</code> class:</p>
+
+<p>```csharp
+public class Address
+{
+  public string Street { get; set;}
+  public string PostalCode { get; set;}
+  public string City { get; set;}
+}</p>
+
+<p>public class Customer
+{
+  public string FirstName { get; set;}
+  public string LastName { get; set;}
+  public Address Address { get; set;}
+}
+```</p>
+
+<p>a <code>DataGridView</code> bound to a collection of <code>Customer</code> instances is not able to display any of the <code>Address</code> properties. In such cases the displayed cells are empty.</p>
+
+<h3>The Solution</h3>
+
+<p>In order to enable the <code>DataGridView</code> to display properties exposed by class members, some custom development is required. The first step is to implement the <code>DataGridView</code>&rsquo;s <code>CellFormatting</code> event handler</p>
+
+<p><code>csharp
+private void gridCustomers_CellFormatting(
+  object sender,
+  DataGridViewCellFormattingEventArgs e)
+{
+  ...
+}
+</code></p>
+
+<p>The <code>CellFormatting</code> event handler needs to differentiate whether the field to be displayed is one of the base data type or an object exposing its own properties. This is achieved by looking for the dot character &lsquo;.&rsquo; in the column&rsquo;s <code>DataPropertyName</code> field:</p>
+
+<p>```csharp
+private void gridCustomers_CellFormatting(
+  object sender,
+  DataGridViewCellFormattingEventArgs e)
+{
+  if ((gridCustomers.Rows[e.RowIndex].DataBoundItem != null) &amp;&amp;</p>
+
+<pre><code>  (gridCustomers.Columns[e.ColumnIndex].DataPropertyName.Contains(".")))
+</code></pre>
+
+<p>  {</p>
+
+<pre><code>...
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>If the <code>DataPropertyName</code> field doesn&rsquo;t contain a dot character, then the actual value of the base data type property must be displayed &ndash; in this case no action is required, since it is already filled in <code>e.Value</code>.</p>
+
+<p>On the other hand, if the <code>DataPropertyName</code> field contains one or more dot characters, then it points to a property exposed by one of the bound class properties. For example, <code>Address.Street</code> contains the dot character, and it points to the <code>Street</code> property of the <code>Address</code> property of a <code>Customer</code> instance. To handle this cases, a recursive function <code>BindProperty</code> is used:</p>
+
+<p>```csharp
+private void gridCustomers_CellFormatting(
+  object sender,
+  DataGridViewCellFormattingEventArgs e)
+{
+  if ((gridCustomers.Rows[e.RowIndex].DataBoundItem != null) &amp;&amp;</p>
+
+<pre><code>  (gridCustomers.Columns[e.ColumnIndex].DataPropertyName.Contains(".")))
+</code></pre>
+
+<p>  {
+  e.Value = BindProperty(</p>
+
+<pre><code>            gridCustomers.Rows[e.RowIndex].DataBoundItem,
+            gridCustomers.Columns[e.ColumnIndex].DataPropertyName
+          );
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>The <code>BindProperty</code> function resolves the data property name and provides the actual value to be displayed in the grid cell by using reflection and (if required) recursion. Two arguments are passed to the <code>BindProperty</code> method: the class property value (which is an instance of a class, in the above example an instance of the <code>Address</code> class) and the <code>DataPropertyName</code>:</p>
+
+<p><code>csharp
+private string BindProperty(object property, string propertyName)
+{
+  ...
+}
+</code></p>
+
+<p>The first thing to check is whether the property name contains the dot character &ndash; although this never happen when called directly from the <code>CellFormatting</code> event handler, since the if statement prevent this, it may happen when <code>BindProperty</code> calls itself recursively.</p>
+
+<p>```csharp
+private string BindProperty(object property, string propertyName)
+{
+  if (propertyName.Contains(&ldquo;.&rdquo;))
+  {</p>
+
+<pre><code>...
+</code></pre>
+
+<p>  }
+  else
+  {</p>
+
+<pre><code>...
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>If the property name doesn&rsquo;t contain any dot character, then the <code>propertyName</code> variable contains the name of the property object to be displayed in the grid.</p>
+
+<p>Reflection is used to read the property value, obtained by retrieving the <code>PropertyInfo</code> from the property variable, and then getting the property value by calling the <code>GetValue()</code> method of the <code>PropertyInfo</code> instance:</p>
+
+<p>```csharp
+private string BindProperty(object property, string propertyName)
+{
+  string retValue = &ldquo;&rdquo;;</p>
+
+<p>  if (propertyName.Contains(&ldquo;.&rdquo;))
+  {</p>
+
+<pre><code>...
+</code></pre>
+
+<p>  }
+  else
+  {</p>
+
+<pre><code>Type propertyType;
+PropertyInfo propertyInfo;
+
+propertyType = property.GetType();
+propertyInfo = propertyType.GetProperty(propertyName);
+retValue = propertyInfo.GetValue(property, null).ToString();
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>This completes the else branch. As for the if branch, it is executed when the property name contains at least one dot character. In this case, still using reflection, the <code>PropertyInfo</code> of the desired property is retrieved, and using recursion, passed to the same <code>BindProperty</code> function.</p>
+
+<p>```csharp
+private string BindProperty(object property, string propertyName)
+{
+  string retValue = &ldquo;&rdquo;;</p>
+
+<p>  if (propertyName.Contains(&ldquo;.&rdquo;))
+  {</p>
+
+<pre><code>PropertyInfo[] arrayProperties;
+string leftPropertyName;
+
+leftPropertyName = propertyName.Substring(0, propertyName.IndexOf("."));
+arrayProperties = property.GetType().GetProperties();
+
+foreach (PropertyInfo propertyInfo in arrayProperties)
+{
+  if (propertyInfo.Name == leftPropertyName)
+  {
+    retValue = BindProperty(
+      propertyInfo.GetValue(property, null), 
+      propertyName.Substring(propertyName.IndexOf(".") + 1));
+    break;
+  }
+}
+</code></pre>
+
+<p>  }
+  else
+  {</p>
+
+<pre><code>Type propertyType;
+PropertyInfo propertyInfo;
+
+propertyType = property.GetType();
+propertyInfo = propertyType.GetProperty(propertyName);
+retValue = propertyInfo.GetValue(property, null).ToString();
+</code></pre>
+
+<p>  }</p>
+
+<p>  return retValue;
+}
+```</p>
+
+<p>The <code>leftPropertyName</code> variable holds the name of the leftmost property, for instance if <code>propertyName</code> is <code>Address.Street</code>, it is filled in with <code>Address</code>. By looping through the array of <code>PropertyInfo</code> of the property object, the <code>PropertyInfo</code> instance of the <code>leftPropertyName</code> property is retrieved. Then, <code>BindProperty</code> is called again, passing the instance of the <code>leftPropertyName</code> property and the right part of <code>propertyName</code> (for instance, in <code>Address.Street</code> the provided property name is <code>Street</code>).</p>
+
+<p>Souce code available on github:
+<a href="https://github.com/jeden/DataGridViewSample">DataGridViewSample</a></p>
+]]></content>
+  </entry>
+  
+</feed>

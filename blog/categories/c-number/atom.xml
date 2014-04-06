@@ -1,0 +1,1329 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: C# | Developer's Corner]]></title>
+  <link href="http://www.developer-corner.com/blog/categories/c-number/atom.xml" rel="self"/>
+  <link href="http://www.developer-corner.com/"/>
+  <updated>2014-04-07T00:09:37+02:00</updated>
+  <id>http://www.developer-corner.com/</id>
+  <author>
+    <name><![CDATA[Antonio Bello]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Casting From Base to Derived Class]]></title>
+    <link href="http://www.developer-corner.com/2009/06/casting-from-base-to-derived-class"/>
+    <updated>2009-07-01T04:59:00+02:00</updated>
+    <id>http://www.developer-corner.com/2009/06/casting-from-base-to-derived-class</id>
+    <content type="html"><![CDATA[<p>Today a friend of mine asked me how to cast from <code>List&lt;&gt;</code> to a custom
+<code>MyCollection</code> class, where <code>MyCollection</code> is derived from <code>List&lt;&gt;</code>. Is this
+possible?</p>
+
+<!-- more -->
+
+
+<p>Let’s suppose we have the following class:</p>
+
+<p>```csharp
+public class MyClass
+{</p>
+
+<pre><code>...
+</code></pre>
+
+<p>}
+```</p>
+
+<p>and we need a collection of instances of this class, for example using the
+generic <code>List&lt;&gt;</code> class</p>
+
+<p><code>csharp
+List&lt;MyClass&gt; myCollection;
+</code></p>
+
+<p>In order to improve readability, but also save time when writing code, we are
+often tempted to create a non-generic class implementing the list we need –
+even if we usually don’t really need such class</p>
+
+<p><code>csharp
+public class MyCollection : List&lt;MyClass&gt;
+{
+}
+</code></p>
+
+<p>The problem arises when we use both the generic version and the custom version
+of the list in our code, and more specifically when we create an instance
+using the generic list and we need to pass this instance to a method expecting
+the custom version of the list:</p>
+
+<p>```csharp
+// This is the method we need to call
+public void DoSomething(MyCollection myCollection)
+{</p>
+
+<pre><code>...
+</code></pre>
+
+<p>}</p>
+
+<p>List<MyClass> myClass = new List<MyClass>();
+DoSomething(myClass); // This doesn&rsquo;t work
+```</p>
+
+<p>The code above generates an error during compilation, whereas a direct cast
+from <code>List&lt;MyClass&gt;</code> to <code>MyCollection</code> generates a runtime exception:</p>
+
+<p>```csharp
+List<MyClass> myList;
+MyCollection myCollection;</p>
+
+<p>myList = new List<MyClass>();
+myCollection = (MyCollection) myList; // This generates a runtime exception
+```</p>
+
+<p>The problem is that <code>List&lt;MyClass&gt;</code> is a base class and <code>MyCollection</code> is a
+derived class, hence there is no way to explicitly perform the cast.</p>
+
+<p>Let’s forget about lists and generics for a moment. We have to classes:</p>
+
+<p>```csharp
+public class MyBaseClass
+{</p>
+
+<pre><code>...
+</code></pre>
+
+<p>}</p>
+
+<p>public class MyDerivedClass : MyBaseClass
+{</p>
+
+<pre><code>...
+</code></pre>
+
+<p>}
+```</p>
+
+<p>If I write the following code:</p>
+
+<p>```csharp
+MyBaseClass myBaseClass;
+MyDerivedClass myDerivedClass;</p>
+
+<p>myBaseClass = new MyBaseClass();</p>
+
+<p>myDerivedClass = (MyDerivedClass) myBaseClass;    // This generates a runtime exception
+```</p>
+
+<p>The last statement obviously causes a runtime exception, as a downcast from a
+base class to a derived class cannot be done.</p>
+
+<p><code>
+`Unhandled Exception: System.InvalidCastException: Unable to cast object of
+type 'MyBaseClass' to type 'MyDerivedClass'.
+at Program.Main() `
+</code></p>
+
+<p>The reason is that a derived class (usually) extends the base class by adding
+more state objects (i.e. data members). When we create an instance of a base
+class, its data members are allocated in memory, but of course data
+members of inherited classes are not allocated. So, downcasting from a base to
+a derived class is not possible because data members of the inherited class
+are not allocated.</p>
+
+<p>But if we instantiate <code>MyBaseClass</code> as <code>MyDerivedClass</code> the cast is allowed – in
+other words downcasting is allowed only when the object to be cast is of the
+same type as the type it’s being cast to:</p>
+
+<p>```csharp
+myBaseClass = new MyDerivedClass();</p>
+
+<p>myDerivedClass = (MyDerivedClass) myBaseClass;
+```</p>
+
+<p>This because <code>myBaseClass</code>, although being a variable of type <code>MyBaseClass</code>, is a
+reference to an instance of <code>MyDerivedClass</code>.</p>
+
+<p>In our problem, <code>MyBaseClass</code> is <code>List&lt;MyClass&gt;</code> and <code>MyDerivedClass</code> is
+<code>MyCollection</code>, so we are trying to cast an instance of a base class to an
+instance of a derived class. It’s evident why the cast we want to do is not
+allowed.</p>
+
+<p>So, is there a solution? If we think in terms of casting, the answer is
+<strong>NO</strong>. What we can do is a conversion.</p>
+
+<p>The difference between cast and conversion is that the cast operates on the
+same object instance, whereas a conversion creates a new copy.</p>
+
+<p>We might think about implementing a conversion operator, either implicit or
+explicit, for instance:</p>
+
+<p>```csharp
+public class MyCollection : List<MyClass>
+{</p>
+
+<pre><code>public static implicit operator MyCollection(List&lt;MyClass&gt; myClass)
+{
+    ...
+}
+...
+</code></pre>
+
+<p>}
+```</p>
+
+<p>but it won’t work, as the compiler generates a <code>CS0553</code> error</p>
+
+<p>```</p>
+
+<blockquote><p>&lsquo;conversion routine&rsquo; : user defined conversion to/from base class
+User-defined conversions to values of a base class are not allowed; you do not
+need such an operator
+```</p></blockquote>
+
+<p>The reason why the compiler denies such conversion is that the explicit <em>cast
+operator</em> from a base to a derived class is automatically generated, and we
+can’t override it with a new <em>conversion operator</em>.</p>
+
+<p>The only viable solutions are either defining a copy constructor or
+implementing a method in the derived class which converts the base class to an
+instance of the derived class:</p>
+
+<p>```csharp
+public class MyCollection : List<MyClass></p>
+
+<pre><code>// Copy constructor
+public MyCollection(List&lt;MyClass&gt; myList) : base (myList)
+{
+    ...
+}
+
+// Conversion method
+public static MyCollection ToMyCollection(List&lt;MyClass&gt; myList)
+{
+    ...
+}
+</code></pre>
+
+<p>}
+```</p>
+
+<p>In both cases, anyway, the conversion implies the creation of a new instance
+of the object to be converted.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Data Integrity Check Using Hashing]]></title>
+    <link href="http://www.developer-corner.com/2008/10/data-integrity-check-using-hashing"/>
+    <updated>2008-11-01T18:19:00+01:00</updated>
+    <id>http://www.developer-corner.com/2008/10/data-integrity-check-using-hashing</id>
+    <content type="html"><![CDATA[<p>When data is moved across a network, the recipient might require a verification to ensure that data has not been modified after send.</p>
+
+<p>For example, in a client/server scenario where a client application sends some updates to a remote database via a web service, the web service might need to verify whether the data has not been modified while travelling across the network, either due to corruption or because somebody changed it. A simple way to implement such kind of verification is utilizing <strong>hashing</strong>.</p>
+
+<!-- more -->
+
+
+<h2>How Hashing works</h2>
+
+<p>The idea behind hashing is to generate a (ideally) <strong>unique</strong> and <strong>non–reversible code</strong> generated from the data being sent.</p>
+
+<p><em>Unique</em> means that the codes generated from 2 different sets of data must be different, regardless of the data size, and even if they differ by 1 byte or 1 bit only.</p>
+
+<p><em>Non-reversible</em> means that the hash code cannot be used to recreate the original data.</p>
+
+<p>For the purpose of signing data to check for modification, the non-reversibility feature is unnecessary, as the hash code travels with the data, but there are other cases where it is undoubtedly useful.</p>
+
+<p>For example, one of the easiest way to prevent passwords from being stored in a database is to store a hash code rather than the password itself. This way, when a user is authenticating, the password is used to generate an hash key, which is compared to the hash key stored in the database (previously generated when the user account has been created, or the last time the user has changed his password) – if  they match, authentication succeeds. The drawback of this method is that a “recall password” feature cannot be implemented, as the password is not stored anywhere, and the non reversibility property of the hash code prevents it from being used to recreate the original data – in such case a “reset password” feature is more appropriate.</p>
+
+<h2>Hashing and Salting</h2>
+
+<p>Using the model described above, data is protected against corruption but not against changes. In fact, whereas a corruption is immediately detected once the recipient verifies that the <a href="http://en.wikipedia.org/wiki/Hash_function">hash codes</a> don’t match, an hacker attempting to modify the data simply has to create a new hash code. Since this code is sent with the data, and since the hashing algorithm is deterministic, whoever wants to modify the data has all ingredients to do so, with no risk of being detected.</p>
+
+<p>So hashing is not enough to guarantee data integrity. One common practice is to use a random or predefined string, which is appended to the data before calculating the hash code. This additional string is known as <strong><a href="http://en.wikipedia.org/wiki/Salt_%28cryptography%29">salt</a></strong>. If the salt is known by sender and recipient only, an hacker has no way to generate an hash code that won’t be immediately detected by the recipient during hash verification.<br/>
+In this scenario the salt can be thought as a private key shared between sender and recipient.</p>
+
+<p>For improved security, it’s better if the salt is not 100% static – for example, a dynamic string depending from the date and/or time can be mixed to the static salt in order to generate a dynamic salt, harder for an hacker to guess. For this method to work both sender and recipient must generate the same salt in a wide enough time window. For example, supposing that sender and recipient have their clocks synchronized, if the salt is composed by current hour and minute, the widest time window is 60 seconds – but the recipient
+could generate a different salt just 1 second after the sender generated the salt code, if this occurs, for example, at 10:20:59. In this case the sender use 10:20 to generate the salt – if the recipient receives the message at least 1 second later, it will use 10:21 to generate the salt. And this obviously leads to a completely different hash code.</p>
+
+<h2>Implementing a data integrity check</h2>
+
+<p>There are several algorithms that can be use to generate hash codes. One of them is <a href="http://en.wikipedia.org/wiki/MD5">MD5</a>, implementable as follows:</p>
+
+<p>```csharp
+using System;
+using System.Security.Cryptography;
+using System.Text;</p>
+
+<p>namespace Hash
+{
+ public class HashGenerator
+ {
+  public static string GenerateMd5Hash(string salt, string data)
+  {
+   byte[] buffer;
+   byte[] binaryHash;
+   string stringHash;
+   MD5 md5;</p>
+
+<p>   md5 = MD5.Create();</p>
+
+<p>   // Combine salt + data and convert to array of bytes
+   buffer = Encoding.Unicode.GetBytes(salt + data);</p>
+
+<p>   // Create the hash code from salt + data
+   binaryHash = md5.ComputeHash(buffer);</p>
+
+<p>   // The hash code is in binary format &ndash; convert
+   // it in readable string
+   stringHash = Convert.ToBase64String(binaryHash);</p>
+
+<p>   return stringHash;
+  }
+ }
+}
+```</p>
+
+<p>The code is pretty simple: salt + data are combined together and converted to array of bytes, then the ComputeHash method of the MD5 instance creates the hash code given the array of bytes. Last, since the hash generated by <code>ComputeHash</code> is in binary format, it is converted to string and returned. To test this code we can create a simple console application like the following one:</p>
+
+<p>```csharp  <br/>
+using System;
+using Hash;</p>
+
+<p>namespace HashSample
+{
+ public class Program
+ {
+  static void Main(string[] args)
+  {
+   string test;
+   string hash;
+   string salt;</p>
+
+<p>   test = &ldquo;This is a sample data&rdquo;;
+   salt = &ldquo;FTSA74D71KSAP&rdquo;;</p>
+
+<p>   hash = HashGenerator.GenerateMd5Hash(salt, test);</p>
+
+<p>   Console.Out.WriteLine(</p>
+
+<pre><code>"The hash code for string '{0}' and salt '{1}' is:\n\t{2}",
+test, salt, hash
+</code></pre>
+
+<p>   );</p>
+
+<p>   Console.In.Read();
+  }
+ }
+}
+```</p>
+
+<p>The output produced by this application is the following:</p>
+
+<p><code>``
+</code>The hash code for string &lsquo;This is a sample data&rsquo; and salt &lsquo;FTSA74D71KSAP&rsquo; is:</p>
+
+<p>s2gxEi9C3QSRGFy+cZheWA==`
+```</p>
+
+<p>To prove how the hash code changes by simply changing 1 byte in the original data, let’s see what happens if we slightly change the test string to “This is <strong>b</strong> sample data”:</p>
+
+<p><code>``
+</code>The hash code for string &lsquo;This is b sample data&rsquo; and salt &lsquo;FTSA74D71KSAP&rsquo; is:</p>
+
+<p>FJr7RUcSYJMJBdfCg6DCXQ== `
+```</p>
+
+<p>We can see that these 2 hashes are completely different.</p>
+
+<h2><code>IHashable</code> interface</h2>
+
+<p>If we need to generate an hash code on instances of a class, why don’t we define a proper interface? This way we can just implement the interface and write a single function to generate the hash code. The interface name is, of course, <code>IHashable</code>:</p>
+
+<p>```csharp
+public interface IHashable
+{</p>
+
+<pre><code>string GetHashableRepresentation();
+string GenerateSalt();
+</code></pre>
+
+<p>}
+```</p>
+
+<p>and consists of 2 methods: <code>GetHashableRepresentation</code> and <code>GenerateSalt</code>. The latter should be implemented in order to generate a proper salt code, whereas the former should return a representation of the class instance in a string format suitable for hashing &ndash; for example, a simple string concatenation of all data members.</p>
+
+<p>As I mentioned earlier, there are several algorithms usable for hashing. Following a comprehensive implementation of the hash generation, which allows the caller to choose which algorithm to use:</p>
+
+<p>```csharp
+public enum HashingAlgorithm
+{</p>
+
+<pre><code>Md5,
+Sha1,
+Sha256,
+Sha384,
+Sha512,
+RipeMd160
+</code></pre>
+
+<p>}</p>
+
+<p>public static string GenerateHash(HashingAlgorithm alg, IHashable hashable)
+{</p>
+
+<pre><code>HashAlgorithm algorithm;
+
+algorithm = CreateHashAlgorithm(alg);
+
+byte[] buffer;
+byte[] binaryHash;
+string stringHash;
+
+// Combine salt + data and convert to array of bytes
+buffer = Encoding.Unicode.GetBytes(hashable.GetHashableRepresentation() + hashable.GenerateSalt());
+
+// Create the hash code from salt + data
+binaryHash = algorithm.ComputeHash(buffer);
+
+// The hash code is in binary format - convert
+// it in readable string
+stringHash = Convert.ToBase64String(binaryHash);
+
+return stringHash;
+</code></pre>
+
+<p>}</p>
+
+<p>private static HashAlgorithm CreateHashAlgorithm(HashingAlgorithm alg)
+{</p>
+
+<pre><code>HashAlgorithm algorithm;
+
+switch (alg)
+{
+    default:
+    case HashingAlgorithm.Md5:
+        algorithm = MD5.Create();
+        break;
+
+    case HashingAlgorithm.Sha1:
+        algorithm = SHA1.Create();
+        break;
+
+    case HashingAlgorithm.Sha256:
+        algorithm = SHA256.Create();
+        break;
+
+    case HashingAlgorithm.Sha384:
+        algorithm = SHA384.Create();
+        break;
+
+    case HashingAlgorithm.Sha512:
+        algorithm = SHA512.Create();
+        break;
+
+    case HashingAlgorithm.RipeMd160:
+        algorithm = RIPEMD160.Create();
+        break;
+}
+
+return algorithm;
+</code></pre>
+
+<p>}
+```</p>
+
+<p>The <code>GenerateHash</code> method requires 2 parameters: the algorithm to use and an instance of <code>IHashable</code>. In return, the method provides an hash code generated using the specified algorithm.</p>
+
+<p>Last thing to mention, a helpful method to compare an hash code with an <code>IHashable</code> instance – its implementation is really very simple:</p>
+
+<p>```csharp  <br/>
+public static bool CompareHashes(HashingAlgorithm alg, string hash, IHashable hashable)
+{</p>
+
+<pre><code>return GenerateHash(alg, hashable).Equals(hash);
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>Digital signature</h2>
+
+<p>When used alone, hashing is good but it’s not the best. There are better ways, out of the scope of this article – but I want to spend a few words about them.</p>
+
+<p>The safest and more secure way to sign data is using <a href="http://en.wikipedia.org/wiki/Digital_signature">digital
+signature</a>, which make use of asymmetric cryptography (also known as <a href="http://en.wikipedia.org/wiki/Public-key_cryptography">public key
+cryptography</a>).</p>
+
+<p>The idea is to encrypt the hash code so that it cannot be modified.<br/>
+In cryptography a key is used to encrypt and decrypt data – it’s not an algorithm, but a secret data used for encryption: using a different key different encrypted data is generated.</p>
+
+<p>A (very simple) example of key is the salt we’ve seen earlier: changing the salt will produce a different hash code. Keys are usually used to encrypt and decrypt data.</p>
+
+<p>In symmetric cryptography the same key is used to encrypt and decrypt data. This is the biggest limitation, as the key must be owned by both parties involved in the encryption and decryption process, or sent along with the encrypted data if the recipient doesn’t have the key.</p>
+
+<p>In public key cryptography a key is composed by a public key and a private key. The private key, as the name implies, is private and should never be sent to anybody. On the other hand, the public key can be published and made available to anybody. The key owner uses his private key to encrypt data – anybody can decrypt the data using the public key, but the cool feature is that the public key can be used to decrypt data encrypted by the corresponding private key only. This means that who is decrypting is sure that data has been encrypted by the owner of the private key only. Keys can also be used in the opposite way: data encrypted with the public key can only be decrypted by the corresponding private key. This way whoever encrypts data using the public key is sure that data will be available to the owner of the corresponding private key only.</p>
+
+<p>In our hashing problem, if the sender encrypts the hash code using his private key, the recipient is able to detect any unauthorized data modification:</p>
+
+<ul>
+<li><p>if the data gets corrupted or changed, the hash code calculated from the data won’t match with the encrypted hash code provided with the data</p></li>
+<li><p>if the encrypted hash code provided with the data is modified, it won’t match with the hash code calculated from the data</p></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Mark a C# Class Data Member as Readonly When It’s Read Only]]></title>
+    <link href="http://www.developer-corner.com/2009/01/mark-c-class-data-member-as-readonly"/>
+    <updated>2008-10-03T03:50:00+02:00</updated>
+    <id>http://www.developer-corner.com/2009/01/mark-c-class-data-member-as-readonly</id>
+    <content type="html"><![CDATA[<p>The <code>readonly</code> modifier is used to declare an instance-specific constant data member which can be initialized in the class constructor and is not limited to compiler-time constants only, providing more flexibility than using the <code>const</code> modifier.</p>
+
+<!-- more -->
+
+
+<p>The <code>const</code> modifier implicitly defines the data member as static, and must be initialized along with its declaration, as follows:</p>
+
+<p><code>csharp  
+public const int myConst = 5;
+</code></p>
+
+<p>If the const is not initialized along with the declaration, the compiler will generate an error. Moreover, a const data member must be initialized with a compile-time constant – in other words there is no way to initialize a constant using a runtime value. For instance, the following code won&rsquo;t compile:</p>
+
+<p>```csharp  <br/>
+public class MyClass
+{</p>
+
+<pre><code>public static string nonConstValue = "This is a variable initialized at runtime";
+public const string constValue = nonConstValue;  // Compilation error
+...
+</code></pre>
+
+<p>}
+```</p>
+
+<p>as the compiler will inform that:</p>
+
+<p><code>
+The expression being assigned to 'MyClass.constValue' must be constant
+</code></p>
+
+<p>The advantage of defining a data member as <code>const</code> is that it cannot be changed – the drawback being the inability to initialize the field in a different place other than the declaration.</p>
+
+<p>On the other hand, the <code>readonly</code> modifier extends the const modifier by allowing the data member to be initialized <em>in any class constructor</em>. This allows a data member to be initialized when a class is being instantiated, preventing it from being modified in any other class method – in other words, once the const data member is initialized it never changes during the class instance lifetime.</p>
+
+<p>As opposed to the <code>const</code> modifier, the <code>readonly</code> modifier creates an instance-specific data member, so each class instance will have its own readonly data member instances. This doesn’t mean that a readonly data
+member cannot be static – simply it must explicitly be declared as such.</p>
+
+<p>All the following declarations and initializations are valid:</p>
+
+<p>```csharp <br/>
+public class MyClass
+{
+  public readonly int <em>myIntField = 5; // Allowed
+  public readonly string </em>myStringField; // Allowed</p>
+
+<p>  public MyClass()
+  {</p>
+
+<pre><code>_myIntField = 8;         // Allowed
+_myStringField = "Initialized in the constructor"; // Allowed
+</code></pre>
+
+<p>  }</p>
+
+<p>  public static void Main()
+  {</p>
+
+<pre><code>MyClass myClass;
+
+myClass = new MyClass();
+
+System.Console.Out.WriteLine(string.Format("myIntField = {0}", myClass._myIntField));
+System.Console.Out.WriteLine(string.Format("myStringField = {0}", myClass._myStringField));
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>The member declared at line 4 is initialized in the constructor with a string constant, whereas the <code>int</code> member declared at line 3 is initialized both in the declaration and in the constructor. In this case, the constructor initialization takes precedence, as it is executed after the data member instantiation.</p>
+
+<p>The following case instead is not valid:</p>
+
+<p>```csharp
+public class MyClass
+{</p>
+
+<pre><code>public readonly string _myStringField; // Allowed
+
+public MyClass()
+{
+    Init();
+}
+
+private void Init()
+{
+    _myStringField = "Cannot be initialized here";  // Compilation error
+}
+
+... 
+</code></pre>
+
+<p>}
+```</p>
+
+<p>That’s because the <code>readonly</code> member is initialized in a class member which is not a constructor, even if this method is called from the constructor. The reason why this is not allowed is that the <code>Init()</code> method can virtually be called from anywhere within the class, or even outside if it is protected, internal or
+public rather than private.</p>
+
+<p>Another advantage of the <code>readonly</code> modifier is that it can be initialized with a runtime value or an expression evaluated at runtime, for instance:</p>
+
+<p>```csharp
+public class MyClass
+{
+  public readonly int  _myIntField; // Allowed</p>
+
+<p>  public MyClass(int runtimeValue)
+  {</p>
+
+<pre><code>_myIntField = 10 * runtimeValue;
+</code></pre>
+
+<p>  }</p>
+
+<p>  public static void Main()
+  {</p>
+
+<pre><code>MyClass myClass;
+
+myClass = new MyClass(5);
+
+System.Console.Out.WriteLine(string.Format("myIntField = {0}", myClass._myIntField));
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>As we can expect, the <code>_myIntField</code> readonly data member will be initialized to <code>10 * 5 = 50</code>.</p>
+
+<p>Readonly data members are not limited to basic data types – it can be used for class instances. For example, when writing a database accessor class we might want to provide a database connection:</p>
+
+<p>```csharp
+public class MyDatabaseAccessor
+{
+  private readonly SqlConnection _connection;</p>
+
+<p>  public MyDatabaseAccessor (SqlConnection connection)
+  {
+   _connection = connection;
+  &hellip;
+  }</p>
+
+<p>  &hellip;</p>
+
+<p>}</p>
+
+<p>public class MyApp
+{
+  public static void Main()
+  {</p>
+
+<pre><code>SqlConnection connection = new SqlConnection();
+
+// Initialize the connection
+...
+
+MyDatabaseAccessor myAccessor = new MyDatabaseAccessor(connection);
+
+// Do something
+...
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>The above code would work without declaring the <code>_connection</code> data member as readonly – but in such case the connection variable can be changed anywhere in the class.</p>
+
+<p>It’s important to keep in mind that when a <code>readonly</code> data member is of a reference type (i.e. instance of a class and not either a struct or a base data type) the <strong>reference is constant</strong>, but <strong>the instance it points to</strong> is not. So the internal status of a readonly instance can change and can be changed, as proven by the following sample:</p>
+
+<p>```csharp
+// Class with a data member
+public class MyClassType
+{
+  private string _internalStatus;</p>
+
+<p>  public string InternalStatus {</p>
+
+<pre><code>get {return _internalStatus;} 
+set {_internalStatus = value;}
+</code></pre>
+
+<p>  }
+}</p>
+
+<p>// Class with a readonly data member
+public class MyClassWithReadonlyMember
+{
+  private readonly MyClassType _readonlyInstance;</p>
+
+<p>  public MyClassWithReadonlyMember(string value)
+  {</p>
+
+<pre><code>_readonlyInstance = new MyClassType();
+_readonlyInstance.InternalStatus = value;
+}
+</code></pre>
+
+<p>  public void SetStatus(string message)
+  {</p>
+
+<pre><code>_readonlyInstance.InternalStatus = message;
+</code></pre>
+
+<p>  }</p>
+
+<p>  public void OutputStatus()
+  {</p>
+
+<pre><code>System.Console.Out.WriteLine(string.Format(
+@"Internal status = '{0}'", _readonlyInstance.InternalStatus));
+</code></pre>
+
+<p>  }
+}</p>
+
+<p>public class MyApp
+{
+  public static void Main()
+  {</p>
+
+<pre><code>MyClassWithReadonlyMember classInstance;
+
+// Create an instance of MyClassWithReadOnlyMember class
+// The instance of MyClassType is initialized to the default 
+// value provided in the constructor
+classInstance = new MyClassWithReadonlyMember("Initial value");
+classInstance.OutputStatus();
+
+// The internal status of the readonly data member of 
+// MyClassWithReadonlyMember is changed
+classInstance.SetStatus("New Value");
+classInstance.OutputStatus();  
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>If this code is compiled and run, it will generate the following output:</p>
+
+<p>```</p>
+
+<blockquote><p>Internal status = &lsquo;Initial value'<br/>
+Internal status = 'New Value&rsquo;
+```</p></blockquote>
+
+<h2>2009.01.30 Addendum</h2>
+
+<p>Thanks to what Chris Marisic highlighted in his comments below, I need to clarify a few points to prevent some misleading assumptions.</p>
+
+<p><strong>#1</strong> &ndash; <code>readonly</code> members can be modified using reflection. The <code>readonly</code> modifier is a compiler directive, so any attempt to modify a readonly data member is detected during compilation. A consequence is that using reflection it&rsquo;s possible to modify a <code>readonly</code> data member</p>
+
+<p><strong>#2</strong> &ndash; I wrote above that the <code>const</code> modifier &ldquo;<em>allows a data member to be initialized when a class is being instantiated, preventing it from being modified in any other class method</em>&rdquo;. This statement doesn&rsquo;t mean that the data member is immutable, at least not always. .NET supports two kinds of data types: <strong>value types</strong> and <strong>reference types</strong>:<br/>
+* value types are allocated on the thread&rsquo;s stack and they hold the actual value<br/>
+* reference types are allocated on the thread&rsquo;s stack and they hold a pointer to an object allocated in the managed heap</p>
+
+<p>In both cases variables are allocated on the thread&rsquo;s stack, the difference being that a value type holds the actual value (for example, an <code>int</code>, a <code>struct</code>), whereas the reference type holds a pointer to the memory area where the actual value is stored (for example, an instance of a <code>StringBuilder</code> class).</p>
+
+<p>When a value type is declared as <code>readonly</code>, its value is immutable, meaning that once assigned it cannot be modified outside constructors.</p>
+
+<p>When a reference type is declared as readonly, the pointer is immutable, but not the object it points to. This means that:</p>
+
+<ul>
+<li><p>a reference type data member can be initialized in order to point to an instance of a class, but once this is done it&rsquo;s not possible to make it point to another instance of a class outside of constructors</p></li>
+<li><p>the <code>readonly</code> modifier has no effect on the object the readonly data member points to.</p></li>
+</ul>
+
+
+<p>Maybe a real example helps to better understand the difference. Let&rsquo;s create a simple class and a simple struct. They have one int data member only.</p>
+
+<p>```csharp
+public class MyClass
+{
+  public int IntField;
+}</p>
+
+<p>public struct MyStruct
+{
+  public int IntField;
+}
+```</p>
+
+<p>Now let&rsquo;s use them in a test class:</p>
+
+<p>```csharp
+public class MyTestClass
+{
+  private readonly MyClass <em>myClass;
+  private readonly MyStruct </em>myStruct;</p>
+
+<p>  public MyTestClass()
+  {</p>
+
+<pre><code>_myClass = new MyClass();
+_myClass.IntField = 4;
+
+_myStruct.IntField = 5;
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>The <code>_myClass</code> data member is a reference type, so it must be initialized by allocating a new instance of <code>MyClass</code> and assigning its pointer, as seen at line 8. On the other hand, the <code>_myStruct</code> data member is a value type, meaning that it is already an instance of <code>MyStruct</code>. Initialization of their respective
+fields are done at lines 9 and 11.</p>
+
+<p>Let&rsquo;s add a method to the <code>MyTestClass</code> class.</p>
+
+<p>```csharp
+public class MyTestClass
+{
+  private readonly MyClass <em>myClass;
+  private readonly MyStruct </em>myStruct;</p>
+
+<p>  public MyTestClass()
+  {</p>
+
+<pre><code>_myClass = new MyClass();
+_myClass.IntField = 4;
+
+_myStruct.IntField = 5;
+</code></pre>
+
+<p>  }</p>
+
+<p>  public void TestReadonly()
+  {</p>
+
+<pre><code>_myClass.IntField = 7;  // Valid statement
+_myStruct.IntField = 10; // Error: _myStruct is readonly
+_myClass = null;   // Error: _myClass is readonly
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>If we try to compile this code, we get 2 errors:</p>
+
+<p>```</p>
+
+<blockquote><p>MyTest.cs(26,3): error CS1648: Members of readonly field &lsquo;MyTestClass._myStruct&rsquo;
+cannot be modified (except in a constructor or a variable initializer)<br/>
+MyTest.cs(27,3): error CS0191: A readonly field cannot be assigned to (except in
+a constructor or a variable initializer)
+```</p></blockquote>
+
+<p><code>MyStruct</code> is a struct, hence a value type; <code>_myStruct</code> is immutable since declared as <code>readonly</code>, so any of its data members cannot be modified outside of a constructor.</p>
+
+<p><code>MyClass</code> is a class, hence a reference type; <code>_myClass</code> is immutable since declared as readonly, so it cannot be modified in order to point to another instance of a class (or to <code>null</code>) outside of a constructor.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[DataGridView: How to Bind Nested Objects]]></title>
+    <link href="http://www.developer-corner.com/2007/07/datagridview-how-to-bind-nested-objects"/>
+    <updated>2007-07-19T06:49:00+02:00</updated>
+    <id>http://www.developer-corner.com/2007/07/datagridview-how-to-bind-nested-objects</id>
+    <content type="html"><![CDATA[<p>The WinForms <code>DatagridView</code> control is not capable of handling nested properties, as it works with base data types only. But implementing such feature is not complicated. Let’s see how.</p>
+
+<!-- more -->
+
+
+<h3>The Problem</h3>
+
+<p>A <code>DataGridView</code> can be bound to a collection of objects to display any of its base data type (i.e. string, int, and so on) properties. For example, a collection of instances of the following class:</p>
+
+<p><code>csharp
+public class Customer
+{
+  public string FirstName { get; set;}
+  public string LastName { get; set;}
+  public string Street { get; set;}
+  public string PostalCode { get; set;}
+  public string City { get; set;}
+}
+</code></p>
+
+<p>can be used to display any of the <code>Customer</code> class properties in the <code>DataGridView</code>.</p>
+
+<p>But what happens when the class exposes other objects which are not base data type? If an <code>Address</code> class is created and used as a property of the <code>Customer</code> class:</p>
+
+<p>```csharp
+public class Address
+{
+  public string Street { get; set;}
+  public string PostalCode { get; set;}
+  public string City { get; set;}
+}</p>
+
+<p>public class Customer
+{
+  public string FirstName { get; set;}
+  public string LastName { get; set;}
+  public Address Address { get; set;}
+}
+```</p>
+
+<p>a <code>DataGridView</code> bound to a collection of <code>Customer</code> instances is not able to display any of the <code>Address</code> properties. In such cases the displayed cells are empty.</p>
+
+<h3>The Solution</h3>
+
+<p>In order to enable the <code>DataGridView</code> to display properties exposed by class members, some custom development is required. The first step is to implement the <code>DataGridView</code>&rsquo;s <code>CellFormatting</code> event handler</p>
+
+<p><code>csharp
+private void gridCustomers_CellFormatting(
+  object sender,
+  DataGridViewCellFormattingEventArgs e)
+{
+  ...
+}
+</code></p>
+
+<p>The <code>CellFormatting</code> event handler needs to differentiate whether the field to be displayed is one of the base data type or an object exposing its own properties. This is achieved by looking for the dot character &lsquo;.&rsquo; in the column&rsquo;s <code>DataPropertyName</code> field:</p>
+
+<p>```csharp
+private void gridCustomers_CellFormatting(
+  object sender,
+  DataGridViewCellFormattingEventArgs e)
+{
+  if ((gridCustomers.Rows[e.RowIndex].DataBoundItem != null) &amp;&amp;</p>
+
+<pre><code>  (gridCustomers.Columns[e.ColumnIndex].DataPropertyName.Contains(".")))
+</code></pre>
+
+<p>  {</p>
+
+<pre><code>...
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>If the <code>DataPropertyName</code> field doesn&rsquo;t contain a dot character, then the actual value of the base data type property must be displayed &ndash; in this case no action is required, since it is already filled in <code>e.Value</code>.</p>
+
+<p>On the other hand, if the <code>DataPropertyName</code> field contains one or more dot characters, then it points to a property exposed by one of the bound class properties. For example, <code>Address.Street</code> contains the dot character, and it points to the <code>Street</code> property of the <code>Address</code> property of a <code>Customer</code> instance. To handle this cases, a recursive function <code>BindProperty</code> is used:</p>
+
+<p>```csharp
+private void gridCustomers_CellFormatting(
+  object sender,
+  DataGridViewCellFormattingEventArgs e)
+{
+  if ((gridCustomers.Rows[e.RowIndex].DataBoundItem != null) &amp;&amp;</p>
+
+<pre><code>  (gridCustomers.Columns[e.ColumnIndex].DataPropertyName.Contains(".")))
+</code></pre>
+
+<p>  {
+  e.Value = BindProperty(</p>
+
+<pre><code>            gridCustomers.Rows[e.RowIndex].DataBoundItem,
+            gridCustomers.Columns[e.ColumnIndex].DataPropertyName
+          );
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>The <code>BindProperty</code> function resolves the data property name and provides the actual value to be displayed in the grid cell by using reflection and (if required) recursion. Two arguments are passed to the <code>BindProperty</code> method: the class property value (which is an instance of a class, in the above example an instance of the <code>Address</code> class) and the <code>DataPropertyName</code>:</p>
+
+<p><code>csharp
+private string BindProperty(object property, string propertyName)
+{
+  ...
+}
+</code></p>
+
+<p>The first thing to check is whether the property name contains the dot character &ndash; although this never happen when called directly from the <code>CellFormatting</code> event handler, since the if statement prevent this, it may happen when <code>BindProperty</code> calls itself recursively.</p>
+
+<p>```csharp
+private string BindProperty(object property, string propertyName)
+{
+  if (propertyName.Contains(&ldquo;.&rdquo;))
+  {</p>
+
+<pre><code>...
+</code></pre>
+
+<p>  }
+  else
+  {</p>
+
+<pre><code>...
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>If the property name doesn&rsquo;t contain any dot character, then the <code>propertyName</code> variable contains the name of the property object to be displayed in the grid.</p>
+
+<p>Reflection is used to read the property value, obtained by retrieving the <code>PropertyInfo</code> from the property variable, and then getting the property value by calling the <code>GetValue()</code> method of the <code>PropertyInfo</code> instance:</p>
+
+<p>```csharp
+private string BindProperty(object property, string propertyName)
+{
+  string retValue = &ldquo;&rdquo;;</p>
+
+<p>  if (propertyName.Contains(&ldquo;.&rdquo;))
+  {</p>
+
+<pre><code>...
+</code></pre>
+
+<p>  }
+  else
+  {</p>
+
+<pre><code>Type propertyType;
+PropertyInfo propertyInfo;
+
+propertyType = property.GetType();
+propertyInfo = propertyType.GetProperty(propertyName);
+retValue = propertyInfo.GetValue(property, null).ToString();
+</code></pre>
+
+<p>  }
+}
+```</p>
+
+<p>This completes the else branch. As for the if branch, it is executed when the property name contains at least one dot character. In this case, still using reflection, the <code>PropertyInfo</code> of the desired property is retrieved, and using recursion, passed to the same <code>BindProperty</code> function.</p>
+
+<p>```csharp
+private string BindProperty(object property, string propertyName)
+{
+  string retValue = &ldquo;&rdquo;;</p>
+
+<p>  if (propertyName.Contains(&ldquo;.&rdquo;))
+  {</p>
+
+<pre><code>PropertyInfo[] arrayProperties;
+string leftPropertyName;
+
+leftPropertyName = propertyName.Substring(0, propertyName.IndexOf("."));
+arrayProperties = property.GetType().GetProperties();
+
+foreach (PropertyInfo propertyInfo in arrayProperties)
+{
+  if (propertyInfo.Name == leftPropertyName)
+  {
+    retValue = BindProperty(
+      propertyInfo.GetValue(property, null), 
+      propertyName.Substring(propertyName.IndexOf(".") + 1));
+    break;
+  }
+}
+</code></pre>
+
+<p>  }
+  else
+  {</p>
+
+<pre><code>Type propertyType;
+PropertyInfo propertyInfo;
+
+propertyType = property.GetType();
+propertyInfo = propertyType.GetProperty(propertyName);
+retValue = propertyInfo.GetValue(property, null).ToString();
+</code></pre>
+
+<p>  }</p>
+
+<p>  return retValue;
+}
+```</p>
+
+<p>The <code>leftPropertyName</code> variable holds the name of the leftmost property, for instance if <code>propertyName</code> is <code>Address.Street</code>, it is filled in with <code>Address</code>. By looping through the array of <code>PropertyInfo</code> of the property object, the <code>PropertyInfo</code> instance of the <code>leftPropertyName</code> property is retrieved. Then, <code>BindProperty</code> is called again, passing the instance of the <code>leftPropertyName</code> property and the right part of <code>propertyName</code> (for instance, in <code>Address.Street</code> the provided property name is <code>Street</code>).</p>
+
+<p>Souce code available on github:
+<a href="https://github.com/jeden/DataGridViewSample">DataGridViewSample</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Single Sign on Across Multiple ASP.NET Applications]]></title>
+    <link href="http://www.developer-corner.com/2006/09/aspnet-single-sign-on"/>
+    <updated>2006-10-01T05:42:00+02:00</updated>
+    <id>http://www.developer-corner.com/2006/09/aspnet-single-sign-on</id>
+    <content type="html"><![CDATA[<p>Single Sign On (SSO) is a term used to indicate when a pool of applications need a centralized authentication, so that users log in once and access to any application.</p>
+
+<p>Implementing a single sign on is pretty simple, and can be done by configuring the applications using the web.config file.</p>
+
+<!-- more -->
+
+
+<h3>Single Sign On</h3>
+
+<p>A default configuration for forms authentication is defined as follows:</p>
+
+<p>```xml
+<configuration>
+  &hellip;
+  &lt;system.web></p>
+
+<pre><code>... 
+&lt;authentication mode="Forms"&gt; 
+  &lt;forms name=".cookiename" 
+         loginUrl="~/Login.aspx" 
+         timeout="30" 
+         path="/" /&gt; 
+&lt;/authentication&gt; 
+... 
+</code></pre>
+
+<p>  &lt;/system.web>
+  &hellip;
+</configuration>
+```</p>
+
+<p>where <code>.cookiename</code>, by default, is <code>.ASPXFORMSAUTH</code>.</p>
+
+<p>In order for authentication data to be recognized across multiple applications, each application must be configured to use the same values for cookie name, protection and path attributes.</p>
+
+<p>But this isn&rsquo;t enough &ndash; in fact, applications must also have the same machine key values (read the <em>Machine Key</em> paragraph at the end of this article for more info about the <code>machineKey</code> element). This data are used to encrypt the
+forms authentication cookie, as mentioned in the <em>Forms Authentication</em> paragraph at the end of this article.</p>
+
+<p>Below a sample <code>web.config</code> excerpt which must be added to each application we want single sign on enabled. In this sample, the <code>validationKey</code> and <code>encryptionKey</code> attributes must be replaced with unique values you have to generate for your own application pool.</p>
+
+<p>```xml
+<configuration>
+  &hellip;
+  &lt;system.web></p>
+
+<pre><code>... 
+&lt;authentication mode="Forms"&gt; 
+  &lt;forms name=".cookiename" 
+         loginUrl="~/Login.aspx" 
+         timeout="30" 
+         path="/" 
+  /&gt; 
+&lt;/authentication&gt; 
+... 
+&lt;machineKey 
+   validationKey= 
+     "F9D1A2D3E1D3E2F7B3D9F90FF3965ABDAC304902" 
+  encryptionKey= 
+     "F9D1A2D3E1D3E2F7B3D9F90FF3965ABDAC304902F8D923AC" 
+  validation="SHA1" 
+/&gt; 
+... 
+</code></pre>
+
+<p>  &lt;/system.web>
+  &hellip;
+</configuration>
+```</p>
+
+<h3>Second and third level domains</h3>
+
+<p>If the cooperating applications are installed under the same 2nd and 3rd level domain, but on different virtual folders, then no additional code is required.</p>
+
+<p>If applications are installed on different second level domains
+(<code>www.domain1.com</code> and <code>www.domain2.com</code>), the SSO method described so far won&rsquo;t work, since cookies cannot be read by applications having different second level domains.</p>
+
+<p>For example, if application A in <code>domain1.com</code> issues a cookie, the cookie may be read by A itself and any application hosted under <code>www.domain1.com</code>, plus any other 3rd level domain (<code>test.domain1.com</code>, <code>beta.domain1.com</code>, and so forth).</p>
+
+<p>Application B in <code>domain2.com</code> isn&rsquo;t able to read the cookie, since it is hosted under a different second level domain.</p>
+
+<p>If cooperating applications are installed on different third level domains, then we need to add some code in order to make SSO work. The code simply has to add the domain name to the authentication cookie, as outlined below</p>
+
+<p>```csharp
+protected void Login (string strUserName, &hellip;)
+{
+  &hellip;
+  System.Web.HttpCookie cookie;</p>
+
+<p>  cookie = FormsAuthentication.GetAuthCookie(strUserName, false);
+  cookie.Domain = &ldquo;domain1.com&rdquo;;
+  cookie.Expires = DateTime.Now.AddDays (-1);
+  Response.AppendCookie (cookie);
+  &hellip;
+}
+```</p>
+
+<h3>Cookie Expiration</h3>
+
+<p>If different applications set different cookie expirations, the actual expiration value is the one set by the application which issued it. So if application A is configured to set an expiration of 1 hour and application B 2 hours, and the user signs in using application B, then the cookie expiration is set to 2 hours.</p>
+
+<h3>Logging out</h3>
+
+<p>Usually, in order to log out a user, a call to the <code>Authentication.SignOut()</code> method is used &ndash; this isn&rsquo;t enough when using SSO.</p>
+
+<p>In order to perform a single sign out, the quickest way is to set the cookie expiration to a past date &ndash; this ensures that the cookie won&rsquo;t be used by any application for authentication.</p>
+
+<p>```csharp
+protected void Logout (string strUserName)
+{
+  System.Web.HttpCookie cookie;</p>
+
+<p>  cookie = FormsAuthentication.GetAuthCookie(strUserName, false);
+  cookie.Domain = &ldquo;domain1.com&rdquo;;
+  cookie.Expires = DateTime.Now.AddDays (-1);
+  Response.AppendCookie (cookie);
+}
+```</p>
+
+<h3>Integrating Web Applications</h3>
+
+<p>What said so far is valid if applications use the same database to store user profiles. But what if 2 applications use each one their own database?</p>
+
+<p>In this case, the SSO works, but sooner or later one of the applications will throw exceptions due to missing data in its database.</p>
+
+<p>If a user registers in application A, once he signs in he can access to application B &ndash; but he never registered in application B, so application B doesn&rsquo;t have this user profile in its database.</p>
+
+<p>This is the case when, for example, we have to integrate 2 existing applications, which already have their own authentication and registration implemented.</p>
+
+<p>To solve this problem, we have 2 choices:</p>
+
+<ul>
+<li>modify both application in order to use a single authentication and registration process, and having a shared user profile repository</li>
+<li>choose one application as the master application, and remove the authentication and registration process from the other application (the slave application)</li>
+</ul>
+
+
+<p>We&rsquo;ll focus on the second solution.</p>
+
+<p>This method requires that the database used by slave applications is accessible by the master application. This can be achieved by either:</p>
+
+<ul>
+<li>Creating a single database which holds both application databases. In this case it would be good to use different prefixes for database entities to avoid naming conflicts &ndash; this could happen if both databases have a <code>Users</code> table. If we choose <code>mst</code> and <code>slv</code> as prefixes, we should rename the <code>Users</code> table to <code>mst_Users</code> for the master database and <code>slv_Users</code> for the slave database. This requires that we modify the source code and stored procedures.</li>
+<li>Using 2 different databases, but the master application must be able to access to the slave&rsquo;s database.</li>
+</ul>
+
+
+<p>Authentication should be performed in the following way:</p>
+
+<ul>
+<li>The user accesses to the master application, and signs in</li>
+<li>The master application verifies the user&rsquo;s credentials</li>
+<li>The master application verifies whether the logged user is defined in the slave database &ndash; if not, accesses to the slave&rsquo;s database and creates the new user</li>
+<li>The master application calls (if existing) a slave&rsquo;s stored procedure which performs post-authentication processing (such as setting a &ldquo;logged in&rdquo; field, inserting a new row in a history table, and so on)</li>
+<li>The master application generates the SSO cookie</li>
+</ul>
+
+
+<p>User profile creation on the slave database requires that:</p>
+
+<ul>
+<li>the master application is able to access to the slave&rsquo;s database</li>
+<li>the slave&rsquo;s database exposes a stored procedure which handles user registration (we may need to write it by ourselves)</li>
+</ul>
+
+
+<p>The second requirement isn&rsquo;t mandatory, since it could also be achieved by using inline SQL &ndash; but I usually prefer the stored procedure solution.</p>
+
+<h3>Final touch</h3>
+
+<p>There would be a few final things to do on the slave application:</p>
+
+<ul>
+<li>Removal of all login links</li>
+<li>Replacement of logout links with a &ldquo;Back to the Master application&rdquo; link</li>
+<li>Replacement of all &ldquo;User&rsquo;s profile&rdquo; links to point to the master application user&rsquo;s profile page</li>
+</ul>
+
+
+<p>These steps ensure that navigation is consistent with integration &ndash; we&rsquo;re supposing that all user&rsquo;s info (credentials, profile, user preferences) are handled by the master application, so we need to modify the slave application accordingly. It is responsibility of the master application to update the user profile in the slave application.</p>
+
+<h3>What if different cookies are used?</h3>
+
+<p>There may be cases where we want to keep authentication cookies separated from master and slaves applications. In this case we can&rsquo;t share the authentication cookie among cooperating applications.</p>
+
+<p>The solution is to create an authentication cookie for the slave application from within the master application.</p>
+
+<p>The code below creates an authentication cookie from the slave application:</p>
+
+<p>```csharp
+FormsAuthenticationTicket ticket;
+HttpCookie cookie;
+string cookiestr;</p>
+
+<p>ticket = new FormsAuthenticationTicket(</p>
+
+<pre><code>                   1, 
+                   userId, 
+                   DateTime.Now, 
+                   DateTime.Now.AddYears (120), 
+                   true, 
+                   "User Data", 
+                   "cookie_path" 
+       ); 
+</code></pre>
+
+<p>cookiestr = FormsAuthentication.Encrypt(ticket);
+cookie = new HttpCookie(&ldquo;cookie_name&rdquo;, cookiestr);
+cookie.Expires = ticket.Expiration;
+cookie.Path = &ldquo;cookie_path&rdquo;;</p>
+
+<p>Response.Cookies.Add(cookie);
+```</p>
+
+<h3>Forms Authentication Ticket</h3>
+
+<p>The <code>FormsAuthenticationTicket</code> class is used to create and read the values of a forms authentication cookie identifying an authenticated user.</p>
+
+<p>Forms authentication tickets must be encrypted using the <code>FormsAuthentication.Encrypt()</code> method before being issued as a cookie.</p>
+
+<p>More information about the  <code>FormsAuthenticationTicket</code> class can be found <a href="http://msdn2.microsoft.com/en-%0Aus/library/system.web.security.formsauthenticationticket.aspx">here</a>.</p>
+
+<p>The <code>FormsAuthenticationTicket</code>, as its name says, is a class used to generate authentication tickets (see the <em>Form Authentication</em> paragraph below). The code sample above shows that the following parameters are used to create the ticket:</p>
+
+<ul>
+<li>ticket version number</li>
+<li>user id</li>
+<li>date and time at which the ticket was generated</li>
+<li>ticket expiration</li>
+<li>whether creating a persistent cookie or limited to the current browser&rsquo;s session</li>
+<li>user specific data to be stored in the ticket (for example, this could be a user class/role)</li>
+<li>cookie path</li>
+</ul>
+
+
+<h1>Machine Key</h1>
+
+<p>The <code>machineKey</code> element of the <code>web.config</code> file is used to specify keys for encryption and decryption of forms authentication cookies and view state data, and also when dealing with out of process session state.</p>
+
+<p>The default configuration uses auto generated decryption key and validation key, and SHA1 encryption type. Using the default configuration, different web applications have different decryption and validation key, since they are randomly generated. To force 2 applications to use the same keys, they must be explicitly defined in the web.config file.</p>
+
+<p>A complete description of the machineKey element is available
+<a href="http://msdn2.microsoft.com/en-us/library/w8h3skw9.aspx">here</a></p>
+
+<h1>Form Authentication</h1>
+
+<p>Forms Authentication uses an authentication ticket stored in either a cookie or embedded in the url.</p>
+
+<p>When used in cookie mode, the cookie contains authentication data, encrypted so that data can be read by the application who has created the cookie.</p>
+
+<p>Cookies are associated to 2nd level domains (example.com), and can be accessed from any 3rd level domain (www.example.com, test.example.com, and so on).</p>
+
+<h3>References</h3>
+
+<p><a href="http://msdn2.microsoft.com/en-%0Aus/library/w8h3skw9.aspx">MSDN &ndash; machineKey element</a></p>
+
+<p><a href="http://msdn2.microsoft.com/en-%0Aus/library/system.web.security.formsauthenticationticket.aspx">MSDN &ndash; FormsAuthenticationTicket class</a></p>
+]]></content>
+  </entry>
+  
+</feed>

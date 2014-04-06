@@ -1,0 +1,659 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Data Integrity Check Using Hashing - Developer's Corner</title>
+  <meta name="author" content="Antonio Bello">
+
+  
+  <meta name="description" content="Data integrity check using hashing">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://www.developer-corner.com/2008/10/data-integrity-check-using-hashing">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Developer's Corner" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-112847-3']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Developer's Corner</a></h1>
+  
+    <h2>by Antonio Bello</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:www.developer-corner.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/about">About</a></li>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Data Integrity Check Using Hashing</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+<time datetime="2008-11-01T18:19:00+01:00" pubdate data-updated="true">Nov 1<span>st</span>, 2008</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://www.developer-corner.com">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>When data is moved across a network, the recipient might require a verification to ensure that data has not been modified after send.</p>
+
+<p>For example, in a client/server scenario where a client application sends some updates to a remote database via a web service, the web service might need to verify whether the data has not been modified while travelling across the network, either due to corruption or because somebody changed it. A simple way to implement such kind of verification is utilizing <strong>hashing</strong>.</p>
+
+<!-- more -->
+
+
+<h2>How Hashing works</h2>
+
+<p>The idea behind hashing is to generate a (ideally) <strong>unique</strong> and <strong>non–reversible code</strong> generated from the data being sent.</p>
+
+<p><em>Unique</em> means that the codes generated from 2 different sets of data must be different, regardless of the data size, and even if they differ by 1 byte or 1 bit only.</p>
+
+<p><em>Non-reversible</em> means that the hash code cannot be used to recreate the original data.</p>
+
+<p>For the purpose of signing data to check for modification, the non-reversibility feature is unnecessary, as the hash code travels with the data, but there are other cases where it is undoubtedly useful.</p>
+
+<p>For example, one of the easiest way to prevent passwords from being stored in a database is to store a hash code rather than the password itself. This way, when a user is authenticating, the password is used to generate an hash key, which is compared to the hash key stored in the database (previously generated when the user account has been created, or the last time the user has changed his password) – if  they match, authentication succeeds. The drawback of this method is that a “recall password” feature cannot be implemented, as the password is not stored anywhere, and the non reversibility property of the hash code prevents it from being used to recreate the original data – in such case a “reset password” feature is more appropriate.</p>
+
+<h2>Hashing and Salting</h2>
+
+<p>Using the model described above, data is protected against corruption but not against changes. In fact, whereas a corruption is immediately detected once the recipient verifies that the <a href="http://en.wikipedia.org/wiki/Hash_function">hash codes</a> don’t match, an hacker attempting to modify the data simply has to create a new hash code. Since this code is sent with the data, and since the hashing algorithm is deterministic, whoever wants to modify the data has all ingredients to do so, with no risk of being detected.</p>
+
+<p>So hashing is not enough to guarantee data integrity. One common practice is to use a random or predefined string, which is appended to the data before calculating the hash code. This additional string is known as <strong><a href="http://en.wikipedia.org/wiki/Salt_%28cryptography%29">salt</a></strong>. If the salt is known by sender and recipient only, an hacker has no way to generate an hash code that won’t be immediately detected by the recipient during hash verification.<br/>
+In this scenario the salt can be thought as a private key shared between sender and recipient.</p>
+
+<p>For improved security, it’s better if the salt is not 100% static – for example, a dynamic string depending from the date and/or time can be mixed to the static salt in order to generate a dynamic salt, harder for an hacker to guess. For this method to work both sender and recipient must generate the same salt in a wide enough time window. For example, supposing that sender and recipient have their clocks synchronized, if the salt is composed by current hour and minute, the widest time window is 60 seconds – but the recipient
+could generate a different salt just 1 second after the sender generated the salt code, if this occurs, for example, at 10:20:59. In this case the sender use 10:20 to generate the salt – if the recipient receives the message at least 1 second later, it will use 10:21 to generate the salt. And this obviously leads to a completely different hash code.</p>
+
+<h2>Implementing a data integrity check</h2>
+
+<p>There are several algorithms that can be use to generate hash codes. One of them is <a href="http://en.wikipedia.org/wiki/MD5">MD5</a>, implementable as follows:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Security.Cryptography</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">System.Text</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">namespace</span> <span class="nn">Hash</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'> <span class="k">public</span> <span class="k">class</span> <span class="nc">HashGenerator</span>
+</span><span class='line'> <span class="p">{</span>
+</span><span class='line'>  <span class="k">public</span> <span class="k">static</span> <span class="kt">string</span> <span class="nf">GenerateMd5Hash</span><span class="p">(</span><span class="kt">string</span> <span class="n">salt</span><span class="p">,</span> <span class="kt">string</span> <span class="n">data</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>   <span class="kt">byte</span><span class="p">[]</span> <span class="n">buffer</span><span class="p">;</span>
+</span><span class='line'>   <span class="kt">byte</span><span class="p">[]</span> <span class="n">binaryHash</span><span class="p">;</span>
+</span><span class='line'>   <span class="kt">string</span> <span class="n">stringHash</span><span class="p">;</span>
+</span><span class='line'>   <span class="n">MD5</span> <span class="n">md5</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="n">md5</span> <span class="p">=</span> <span class="n">MD5</span><span class="p">.</span><span class="n">Create</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="c1">// Combine salt + data and convert to array of bytes</span>
+</span><span class='line'>   <span class="n">buffer</span> <span class="p">=</span> <span class="n">Encoding</span><span class="p">.</span><span class="n">Unicode</span><span class="p">.</span><span class="n">GetBytes</span><span class="p">(</span><span class="n">salt</span> <span class="p">+</span> <span class="n">data</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="c1">// Create the hash code from salt + data</span>
+</span><span class='line'>   <span class="n">binaryHash</span> <span class="p">=</span> <span class="n">md5</span><span class="p">.</span><span class="n">ComputeHash</span><span class="p">(</span><span class="n">buffer</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="c1">// The hash code is in binary format - convert</span>
+</span><span class='line'>   <span class="c1">// it in readable string</span>
+</span><span class='line'>   <span class="n">stringHash</span> <span class="p">=</span> <span class="n">Convert</span><span class="p">.</span><span class="n">ToBase64String</span><span class="p">(</span><span class="n">binaryHash</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="k">return</span> <span class="n">stringHash</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'> <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The code is pretty simple: salt + data are combined together and converted to array of bytes, then the ComputeHash method of the MD5 instance creates the hash code given the array of bytes. Last, since the hash generated by <code>ComputeHash</code> is in binary format, it is converted to string and returned. To test this code we can create a simple console application like the following one:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+</span><span class='line'><span class="k">using</span> <span class="nn">Hash</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">namespace</span> <span class="nn">HashSample</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'> <span class="k">public</span> <span class="k">class</span> <span class="nc">Program</span>
+</span><span class='line'> <span class="p">{</span>
+</span><span class='line'>  <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">(</span><span class="kt">string</span><span class="p">[]</span> <span class="n">args</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>   <span class="kt">string</span> <span class="n">test</span><span class="p">;</span>
+</span><span class='line'>   <span class="kt">string</span> <span class="n">hash</span><span class="p">;</span>
+</span><span class='line'>   <span class="kt">string</span> <span class="n">salt</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="n">test</span> <span class="p">=</span> <span class="s">&quot;This is a sample data&quot;</span><span class="p">;</span>
+</span><span class='line'>   <span class="n">salt</span> <span class="p">=</span> <span class="s">&quot;FTSA74D71KSAP&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="n">hash</span> <span class="p">=</span> <span class="n">HashGenerator</span><span class="p">.</span><span class="n">GenerateMd5Hash</span><span class="p">(</span><span class="n">salt</span><span class="p">,</span> <span class="n">test</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="n">Console</span><span class="p">.</span><span class="n">Out</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;The hash code for string &#39;{0}&#39; and salt &#39;{1}&#39; is:\n\t{2}&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">test</span><span class="p">,</span> <span class="n">salt</span><span class="p">,</span> <span class="n">hash</span>
+</span><span class='line'>   <span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="n">Console</span><span class="p">.</span><span class="n">In</span><span class="p">.</span><span class="n">Read</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'> <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The output produced by this application is the following:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="err">`</span><span class="n">The</span> <span class="n">hash</span> <span class="n">code</span> <span class="k">for</span> <span class="kt">string</span> <span class="err">&#39;</span><span class="n">This</span> <span class="k">is</span> <span class="n">a</span> <span class="n">sample</span> <span class="n">data</span><span class="err">&#39;</span> <span class="n">and</span> <span class="n">salt</span> <span class="err">&#39;</span><span class="n">FTSA74D71KSAP</span><span class="err">&#39;</span> <span class="k">is</span><span class="p">:</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">s2gxEi9C3QSRGFy</span><span class="p">+</span><span class="n">cZheWA</span><span class="p">==</span><span class="err">`</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>To prove how the hash code changes by simply changing 1 byte in the original data, let’s see what happens if we slightly change the test string to “This is <strong>b</strong> sample data”:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="err">`</span><span class="n">The</span> <span class="n">hash</span> <span class="n">code</span> <span class="k">for</span> <span class="kt">string</span> <span class="err">&#39;</span><span class="n">This</span> <span class="k">is</span> <span class="n">b</span> <span class="n">sample</span> <span class="n">data</span><span class="err">&#39;</span> <span class="n">and</span> <span class="n">salt</span> <span class="err">&#39;</span><span class="n">FTSA74D71KSAP</span><span class="err">&#39;</span> <span class="k">is</span><span class="p">:</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">FJr7RUcSYJMJBdfCg6DCXQ</span><span class="p">==</span> <span class="err">`</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We can see that these 2 hashes are completely different.</p>
+
+<h2><code>IHashable</code> interface</h2>
+
+<p>If we need to generate an hash code on instances of a class, why don’t we define a proper interface? This way we can just implement the interface and write a single function to generate the hash code. The interface name is, of course, <code>IHashable</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">public</span> <span class="k">interface</span> <span class="n">IHashable</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="kt">string</span> <span class="nf">GetHashableRepresentation</span><span class="p">();</span>
+</span><span class='line'>    <span class="kt">string</span> <span class="nf">GenerateSalt</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>and consists of 2 methods: <code>GetHashableRepresentation</code> and <code>GenerateSalt</code>. The latter should be implemented in order to generate a proper salt code, whereas the former should return a representation of the class instance in a string format suitable for hashing &ndash; for example, a simple string concatenation of all data members.</p>
+
+<p>As I mentioned earlier, there are several algorithms usable for hashing. Following a comprehensive implementation of the hash generation, which allows the caller to choose which algorithm to use:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">public</span> <span class="k">enum</span> <span class="n">HashingAlgorithm</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">Md5</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">Sha1</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">Sha256</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">Sha384</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">Sha512</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">RipeMd160</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">public</span> <span class="k">static</span> <span class="kt">string</span> <span class="nf">GenerateHash</span><span class="p">(</span><span class="n">HashingAlgorithm</span> <span class="n">alg</span><span class="p">,</span> <span class="n">IHashable</span> <span class="n">hashable</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">HashAlgorithm</span> <span class="n">algorithm</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">algorithm</span> <span class="p">=</span> <span class="n">CreateHashAlgorithm</span><span class="p">(</span><span class="n">alg</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">byte</span><span class="p">[]</span> <span class="n">buffer</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">byte</span><span class="p">[]</span> <span class="n">binaryHash</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">string</span> <span class="n">stringHash</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Combine salt + data and convert to array of bytes</span>
+</span><span class='line'>    <span class="n">buffer</span> <span class="p">=</span> <span class="n">Encoding</span><span class="p">.</span><span class="n">Unicode</span><span class="p">.</span><span class="n">GetBytes</span><span class="p">(</span><span class="n">hashable</span><span class="p">.</span><span class="n">GetHashableRepresentation</span><span class="p">()</span> <span class="p">+</span> <span class="n">hashable</span><span class="p">.</span><span class="n">GenerateSalt</span><span class="p">());</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Create the hash code from salt + data</span>
+</span><span class='line'>    <span class="n">binaryHash</span> <span class="p">=</span> <span class="n">algorithm</span><span class="p">.</span><span class="n">ComputeHash</span><span class="p">(</span><span class="n">buffer</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// The hash code is in binary format - convert</span>
+</span><span class='line'>    <span class="c1">// it in readable string</span>
+</span><span class='line'>    <span class="n">stringHash</span> <span class="p">=</span> <span class="n">Convert</span><span class="p">.</span><span class="n">ToBase64String</span><span class="p">(</span><span class="n">binaryHash</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="n">stringHash</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">private</span> <span class="k">static</span> <span class="n">HashAlgorithm</span> <span class="nf">CreateHashAlgorithm</span><span class="p">(</span><span class="n">HashingAlgorithm</span> <span class="n">alg</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">HashAlgorithm</span> <span class="n">algorithm</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">switch</span> <span class="p">(</span><span class="n">alg</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="k">default</span><span class="p">:</span>
+</span><span class='line'>        <span class="k">case</span> <span class="n">HashingAlgorithm</span><span class="p">.</span><span class="n">Md5</span><span class="p">:</span>
+</span><span class='line'>            <span class="n">algorithm</span> <span class="p">=</span> <span class="n">MD5</span><span class="p">.</span><span class="n">Create</span><span class="p">();</span>
+</span><span class='line'>            <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">case</span> <span class="n">HashingAlgorithm</span><span class="p">.</span><span class="n">Sha1</span><span class="p">:</span>
+</span><span class='line'>            <span class="n">algorithm</span> <span class="p">=</span> <span class="n">SHA1</span><span class="p">.</span><span class="n">Create</span><span class="p">();</span>
+</span><span class='line'>            <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">case</span> <span class="n">HashingAlgorithm</span><span class="p">.</span><span class="n">Sha256</span><span class="p">:</span>
+</span><span class='line'>            <span class="n">algorithm</span> <span class="p">=</span> <span class="n">SHA256</span><span class="p">.</span><span class="n">Create</span><span class="p">();</span>
+</span><span class='line'>            <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">case</span> <span class="n">HashingAlgorithm</span><span class="p">.</span><span class="n">Sha384</span><span class="p">:</span>
+</span><span class='line'>            <span class="n">algorithm</span> <span class="p">=</span> <span class="n">SHA384</span><span class="p">.</span><span class="n">Create</span><span class="p">();</span>
+</span><span class='line'>            <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">case</span> <span class="n">HashingAlgorithm</span><span class="p">.</span><span class="n">Sha512</span><span class="p">:</span>
+</span><span class='line'>            <span class="n">algorithm</span> <span class="p">=</span> <span class="n">SHA512</span><span class="p">.</span><span class="n">Create</span><span class="p">();</span>
+</span><span class='line'>            <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">case</span> <span class="n">HashingAlgorithm</span><span class="p">.</span><span class="n">RipeMd160</span><span class="p">:</span>
+</span><span class='line'>            <span class="n">algorithm</span> <span class="p">=</span> <span class="n">RIPEMD160</span><span class="p">.</span><span class="n">Create</span><span class="p">();</span>
+</span><span class='line'>            <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="n">algorithm</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The <code>GenerateHash</code> method requires 2 parameters: the algorithm to use and an instance of <code>IHashable</code>. In return, the method provides an hash code generated using the specified algorithm.</p>
+
+<p>Last thing to mention, a helpful method to compare an hash code with an <code>IHashable</code> instance – its implementation is really very simple:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">public</span> <span class="k">static</span> <span class="kt">bool</span> <span class="nf">CompareHashes</span><span class="p">(</span><span class="n">HashingAlgorithm</span> <span class="n">alg</span><span class="p">,</span> <span class="kt">string</span> <span class="n">hash</span><span class="p">,</span> <span class="n">IHashable</span> <span class="n">hashable</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nf">GenerateHash</span><span class="p">(</span><span class="n">alg</span><span class="p">,</span> <span class="n">hashable</span><span class="p">).</span><span class="n">Equals</span><span class="p">(</span><span class="n">hash</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Digital signature</h2>
+
+<p>When used alone, hashing is good but it’s not the best. There are better ways, out of the scope of this article – but I want to spend a few words about them.</p>
+
+<p>The safest and more secure way to sign data is using <a href="http://en.wikipedia.org/wiki/Digital_signature">digital
+signature</a>, which make use of asymmetric cryptography (also known as <a href="http://en.wikipedia.org/wiki/Public-key_cryptography">public key
+cryptography</a>).</p>
+
+<p>The idea is to encrypt the hash code so that it cannot be modified.<br/>
+In cryptography a key is used to encrypt and decrypt data – it’s not an algorithm, but a secret data used for encryption: using a different key different encrypted data is generated.</p>
+
+<p>A (very simple) example of key is the salt we’ve seen earlier: changing the salt will produce a different hash code. Keys are usually used to encrypt and decrypt data.</p>
+
+<p>In symmetric cryptography the same key is used to encrypt and decrypt data. This is the biggest limitation, as the key must be owned by both parties involved in the encryption and decryption process, or sent along with the encrypted data if the recipient doesn’t have the key.</p>
+
+<p>In public key cryptography a key is composed by a public key and a private key. The private key, as the name implies, is private and should never be sent to anybody. On the other hand, the public key can be published and made available to anybody. The key owner uses his private key to encrypt data – anybody can decrypt the data using the public key, but the cool feature is that the public key can be used to decrypt data encrypted by the corresponding private key only. This means that who is decrypting is sure that data has been encrypted by the owner of the private key only. Keys can also be used in the opposite way: data encrypted with the public key can only be decrypted by the corresponding private key. This way whoever encrypts data using the public key is sure that data will be available to the owner of the corresponding private key only.</p>
+
+<p>In our hashing problem, if the sender encrypts the hash code using his private key, the recipient is able to detect any unauthorized data modification:</p>
+
+<ul>
+<li><p>if the data gets corrupted or changed, the hash code calculated from the data won’t match with the encrypted hash code provided with the data</p></li>
+<li><p>if the encrypted hash code provided with the data is modified, it won’t match with the hash code calculated from the data</p></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Antonio Bello</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+<time datetime="2011-06-11T06:40:55+02:00" class="updated">Updated Jun 11<span>th</span>, 2011</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/c-number/'>c#</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://www.developer-corner.com/2008/10/data-integrity-check-using-hashing" data-via="ant_bello" data-counturl="http://www.developer-corner.com/2008/10/data-integrity-check-using-hashing" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2009/01/mark-c-class-data-member-as-readonly" title="Previous Post: Mark a C# class data member as readonly when it’s read only">&laquo; Mark a C# class data member as readonly when it’s read only</a>
+      
+      
+        <a class="basic-alignment right" href="/2009/02/choosing-web-color-scheme" title="Next Post: Choosing a web color scheme">Choosing a web color scheme &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2014/04/time-tracking-app-in-meteor">Creating a Time Tracking App With Meteor</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2011/06/cloning-dijit-widgets">Cloning Dijit Widgets</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2009/07/slow-build-on-compact-framework-projects">Slow Build on Compact Framework Projects</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2009/06/casting-from-base-to-derived-class">Casting From Base to Derived Class</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2009/02/choosing-web-color-scheme">Choosing a Web Color Scheme</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Antonio Bello -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'developer-corner';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://www.developer-corner.com/2008/10/data-integrity-check-using-hashing';
+        var disqus_url = 'http://www.developer-corner.com/2008/10/data-integrity-check-using-hashing';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

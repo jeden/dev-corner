@@ -1,15 +1,61 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
-        <loc>http://jeden.github.io/blog/archives/</loc>
+        <loc>http://www.developer-corner.com/2006/09/aspnet-single-sign-on</loc>
         <lastmod>2014-04-06T23:14:57+02:00</lastmod>
     </url>
     <url>
-        <loc>http://jeden.github.io/</loc>
+        <loc>http://www.developer-corner.com/2007/07/datagridview-how-to-bind-nested-objects</loc>
         <lastmod>2014-04-06T23:14:57+02:00</lastmod>
     </url>
     <url>
-        <loc>http://jeden.github.io/robots.txt</loc>
+        <loc>http://www.developer-corner.com/2009/01/mark-c-class-data-member-as-readonly</loc>
+        <lastmod>2014-04-06T23:14:57+02:00</lastmod>
+    </url>
+    <url>
+        <loc>http://www.developer-corner.com/2008/10/data-integrity-check-using-hashing</loc>
+        <lastmod>2014-04-06T23:14:57+02:00</lastmod>
+    </url>
+    <url>
+        <loc>http://www.developer-corner.com/2009/02/choosing-web-color-scheme</loc>
+        <lastmod>2014-04-06T23:14:57+02:00</lastmod>
+    </url>
+    <url>
+        <loc>http://www.developer-corner.com/2009/06/casting-from-base-to-derived-class</loc>
+        <lastmod>2014-04-06T23:14:57+02:00</lastmod>
+    </url>
+    <url>
+        <loc>
+            http://www.developer-corner.com/2009/07/slow-build-on-compact-framework-projects
+        </loc>
+        <lastmod>2014-04-06T23:14:57+02:00</lastmod>
+    </url>
+    <url>
+        <loc>http://www.developer-corner.com/2011/06/cloning-dijit-widgets</loc>
+        <lastmod>2014-04-06T23:14:57+02:00</lastmod>
+    </url>
+    <url>
+        <loc>http://www.developer-corner.com/2014/04/time-tracking-app-in-meteor</loc>
+        <lastmod>2014-04-06T23:55:54+02:00</lastmod>
+    </url>
+    <url>
+        <loc>http://www.developer-corner.com/about/about-blog.html</loc>
+        <lastmod>2014-04-06T23:55:54+02:00</lastmod>
+    </url>
+    <url>
+        <loc>http://www.developer-corner.com/about/</loc>
+        <lastmod>2014-04-07T00:09:11+02:00</lastmod>
+    </url>
+    <url>
+        <loc>http://www.developer-corner.com/blog/archives/</loc>
+        <lastmod>2014-04-06T23:55:54+02:00</lastmod>
+    </url>
+    <url>
+        <loc>http://www.developer-corner.com/</loc>
+        <lastmod>2014-04-06T23:55:54+02:00</lastmod>
+    </url>
+    <url>
+        <loc>http://www.developer-corner.com/robots.txt</loc>
         <lastmod>2014-04-06T23:14:57+02:00</lastmod>
     </url>
 </urlset>

@@ -1,0 +1,481 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Slow Build on Compact Framework Projects - Developer's Corner</title>
+  <meta name="author" content="Antonio Bello">
+
+  
+  <meta name="description" content="Slow build on compact framework projects">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://www.developer-corner.com/2009/07/slow-build-on-compact-framework-projects">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Developer's Corner" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-112847-3']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Developer's Corner</a></h1>
+  
+    <h2>by Antonio Bello</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:www.developer-corner.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/about">About</a></li>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Slow Build on Compact Framework Projects</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+<time datetime="2009-07-28T05:05:00+02:00" pubdate data-updated="true">Jul 28<span>th</span>, 2009</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://www.developer-corner.com">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>I&rsquo;ve been experiencing an extremely high build time on a windows mobile
+project targeted to compact framework 2.0 before finding out what was
+responsible of such slowness. Fortunately solving this problem is as easy as
+adding a line to a configuration file.</p>
+
+<!-- more -->
+
+
+<p>The project is an order entry application targeted for compact framework 2.0.
+As of now, it is a solution made up of 7 projects, 2 of which are executables
+and the other ones are libraries. The first thing I noticed is that slowness
+occurred on one project only: the data layer. I am using <a href="http://www.llblgen.com/">LLBLGen
+Pro</a>, a powerful O/R mapper that simplifies data
+layer development taking advantage of its visual designer and code generator.
+The complete list of assemblies referenced by my project is shown below:</p>
+
+<p><img src="/res/images/2009-07-28-platform-verification-task/list_of_assemblies.png" alt="Project
+References" /></p>
+
+<p>I&rsquo;m not sure whether the slowness is caused by the LLBLGen Pro or either of
+the System.Data.* assemblies, or maybe both. I just know that the same issue
+happened on Windows XP, Vista 64, using either Visual Studio 2005 and 2008.
+I&rsquo;ve just reinstalled Vista Ultimate on my T61p yesterday, and at the first
+full build it took 30 to 60 seconds, whereas it should take just a few
+seconds. Fortunately I already know how to solve this issue, but I hope anyone
+having the same issue can find the solution here.</p>
+
+<p>The most important hint came after enabling diagnostic build output (<em>Tools</em>
+menu, <em>Options</em>, <em>Projects and Solutions</em>, <em>Build and Run</em>, <em>MSBuild project
+build output verbosity</em> option). After setting this property to Diagnostic, on
+next build I found the following statistics:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='text'><span class='line'>Task Performance Summary:
+</span><span class='line'>        0 ms  RemoveDuplicates                           2 calls
+</span><span class='line'>        0 ms  GetDeviceFrameworkPath                     1 calls
+</span><span class='line'>        0 ms  Message                                    5 calls
+</span><span class='line'>        0 ms  AssignCulture                              1 calls
+</span><span class='line'>        0 ms  FindAppConfigFile                          1 calls
+</span><span class='line'>        0 ms  AssignTargetPath                          10 calls
+</span><span class='line'>        0 ms  MakeDir                                    1 calls
+</span><span class='line'>        0 ms  ResolveNonMSBuildProjectOutput             1 calls
+</span><span class='line'>        0 ms  GetFrameworkPath                           1 calls
+</span><span class='line'>        0 ms  Delete                                     1 calls
+</span><span class='line'>        1 ms  CreateProperty                             1 calls
+</span><span class='line'>        1 ms  ConvertToAbsolutePath                      1 calls
+</span><span class='line'>        1 ms  ReadLinesFromFile                          1 calls
+</span><span class='line'>       12 ms  Copy                                       6 calls
+</span><span class='line'>       20 ms  FindUnderPath                              5 calls
+</span><span class='line'>       32 ms  Csc                                        1 calls
+</span><span class='line'>       47 ms  MSBuild                                    3 calls
+</span><span class='line'>      110 ms  ResolveAssemblyReference                   1 calls
+</span><span class='line'>    18382 ms  PlatformVerificationTask                   1 calls
+</span><span class='line'>
+</span><span class='line'>Build succeeded.
+</span><span class='line'>
+</span><span class='line'>Time Elapsed 00:00:18.64
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So it looks like the build spends 18 seconds on the &ldquo;<em>Platform Verification
+Task</em>&rdquo;. A good explanation about what this task is can be found in <a href="http://blogs.msdn.com/vsdteam/archive/2006/09/15/756400.aspx">this blog
+post</a>, along
+with the solution (although I came to this blog post <strong>after</strong> I found the
+solution elsewhere). In fact I simply need to disable the platform
+verification task, by editing the <code>Microsoft.CompactFramework.common.targets</code>
+file in the <code>C:\Windows\Microsoft.NET\Framework\v3.5 folder</code>. Once the file is
+opened using your favorite text editor (mine is <a href="http://notepad-%0Aplus.sourceforge.net/">Notepad++</a>), locate the <code>&lt;target&gt;</code> tag having the <code>name</code> attribute set
+to <code>PlatformVerificationTask</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;Target</span>
+</span><span class='line'>    <span class="na">Name=</span><span class="s">&quot;PlatformVerificationTask&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;PlatformVerificationTask</span>
+</span><span class='line'>        <span class="na">PlatformFamilyName=</span><span class="s">&quot;$(PlatformFamilyName)&quot;</span>
+</span><span class='line'>        <span class="na">PlatformID=</span><span class="s">&quot;$(PlatformID)&quot;</span>
+</span><span class='line'>        <span class="na">SourceAssembly=</span><span class="s">&quot;@(IntermediateAssembly)&quot;</span>
+</span><span class='line'>        <span class="na">ReferencePath=</span><span class="s">&quot;@(ReferencePath)&quot;</span>
+</span><span class='line'>        <span class="na">TreatWarningsAsErrors=</span><span class="s">&quot;$(TreatWarningsAsErrors)&quot;</span>
+</span><span class='line'>        <span class="na">PlatformVersion=</span><span class="s">&quot;$(TargetFrameworkVersion)&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'><span class="nt">&lt;/Target&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>then add the <code>Condition</code> attribute to the <code>PlatformVerificationTask</code> tag as
+follows (the added line is the no. 4):</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;Target</span>
+</span><span class='line'>    <span class="na">Name=</span><span class="s">&quot;PlatformVerificationTask&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;PlatformVerificationTask</span>
+</span><span class='line'>        <span class="na">Condition=</span><span class="s">&quot;&#39;$(DoPlatformVerificationTask)&#39;==&#39;true&#39;&quot;</span> <span class="err">&lt;!--</span> <span class="err">Added</span> <span class="err">--</span><span class="nt">&gt;</span>
+</span><span class='line'>        PlatformFamilyName=&quot;$(PlatformFamilyName)&quot;
+</span><span class='line'>        PlatformID=&quot;$(PlatformID)&quot;
+</span><span class='line'>        SourceAssembly=&quot;@(IntermediateAssembly)&quot;
+</span><span class='line'>        ReferencePath=&quot;@(ReferencePath)&quot;
+</span><span class='line'>        TreatWarningsAsErrors=&quot;$(TreatWarningsAsErrors)&quot;
+</span><span class='line'>        PlatformVersion=&quot;$(TargetFrameworkVersion)&quot;/&gt;
+</span><span class='line'><span class="nt">&lt;/Target&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Last, save and restart Visual Studio. Now the PlatformVerificationTask is not
+reported in the build log any longer, but most important, a normal build takes
+less than a second and a rebuild just a couple of seconds.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='text'><span class='line'>Task Performance Summary:
+</span><span class='line'>        0 ms  CreateProperty                             1 calls
+</span><span class='line'>        0 ms  ResolveNonMSBuildProjectOutput             1 calls
+</span><span class='line'>        0 ms  AssignTargetPath                          10 calls
+</span><span class='line'>        0 ms  ConvertToAbsolutePath                      1 calls
+</span><span class='line'>        0 ms  AssignCulture                              1 calls
+</span><span class='line'>        0 ms  FindAppConfigFile                          1 calls
+</span><span class='line'>        0 ms  Message                                    5 calls
+</span><span class='line'>        0 ms  RemoveDuplicates                           2 calls
+</span><span class='line'>        0 ms  Delete                                     1 calls
+</span><span class='line'>        0 ms  MakeDir                                    1 calls
+</span><span class='line'>        1 ms  GetDeviceFrameworkPath                     1 calls
+</span><span class='line'>        1 ms  GetFrameworkPath                           1 calls
+</span><span class='line'>        3 ms  Copy                                       6 calls
+</span><span class='line'>        6 ms  ReadLinesFromFile                          1 calls
+</span><span class='line'>       11 ms  FindUnderPath                              5 calls
+</span><span class='line'>       33 ms  Csc                                        1 calls
+</span><span class='line'>       53 ms  MSBuild                                    3 calls
+</span><span class='line'>       75 ms  ResolveAssemblyReference                   1 calls
+</span><span class='line'>
+</span><span class='line'>Build succeeded.
+</span><span class='line'>
+</span><span class='line'>Time Elapsed 00:00:00.22
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>References</h4>
+
+<p>Visual Studio For Devices blog: <a href="http://blogs.msdn.com/vsdteam/archive/2006/09/15/756400.aspx">Platform Verification Task</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Antonio Bello</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+<time datetime="2011-06-08T05:13:27+02:00" class="updated">Updated Jun 8<span>th</span>, 2011</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/vs-dot-net/'>vs.net</a>, <a class='category' href='/blog/categories/windowsmobile/'>windowsmobile</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://www.developer-corner.com/2009/07/slow-build-on-compact-framework-projects" data-via="ant_bello" data-counturl="http://www.developer-corner.com/2009/07/slow-build-on-compact-framework-projects" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2009/06/casting-from-base-to-derived-class" title="Previous Post: Casting from base to derived class">&laquo; Casting from base to derived class</a>
+      
+      
+        <a class="basic-alignment right" href="/2011/06/cloning-dijit-widgets" title="Next Post: Cloning Dijit widgets">Cloning Dijit widgets &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2014/04/time-tracking-app-in-meteor">Creating a Time Tracking App With Meteor</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2011/06/cloning-dijit-widgets">Cloning Dijit Widgets</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2009/07/slow-build-on-compact-framework-projects">Slow Build on Compact Framework Projects</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2009/06/casting-from-base-to-derived-class">Casting From Base to Derived Class</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2009/02/choosing-web-color-scheme">Choosing a Web Color Scheme</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Antonio Bello -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'developer-corner';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://www.developer-corner.com/2009/07/slow-build-on-compact-framework-projects';
+        var disqus_url = 'http://www.developer-corner.com/2009/07/slow-build-on-compact-framework-projects';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

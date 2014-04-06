@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: vs.net | Developer's Corner]]></title>
+  <link href="http://www.developer-corner.com/blog/categories/vs-dot-net/atom.xml" rel="self"/>
+  <link href="http://www.developer-corner.com/"/>
+  <updated>2014-04-07T00:09:37+02:00</updated>
+  <id>http://www.developer-corner.com/</id>
+  <author>
+    <name><![CDATA[Antonio Bello]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Slow Build on Compact Framework Projects]]></title>
+    <link href="http://www.developer-corner.com/2009/07/slow-build-on-compact-framework-projects"/>
+    <updated>2009-07-28T05:05:00+02:00</updated>
+    <id>http://www.developer-corner.com/2009/07/slow-build-on-compact-framework-projects</id>
+    <content type="html"><![CDATA[<p>I&rsquo;ve been experiencing an extremely high build time on a windows mobile
+project targeted to compact framework 2.0 before finding out what was
+responsible of such slowness. Fortunately solving this problem is as easy as
+adding a line to a configuration file.</p>
+
+<!-- more -->
+
+
+<p>The project is an order entry application targeted for compact framework 2.0.
+As of now, it is a solution made up of 7 projects, 2 of which are executables
+and the other ones are libraries. The first thing I noticed is that slowness
+occurred on one project only: the data layer. I am using <a href="http://www.llblgen.com/">LLBLGen
+Pro</a>, a powerful O/R mapper that simplifies data
+layer development taking advantage of its visual designer and code generator.
+The complete list of assemblies referenced by my project is shown below:</p>
+
+<p><img src="/res/images/2009-07-28-platform-verification-task/list_of_assemblies.png" alt="Project
+References" /></p>
+
+<p>I&rsquo;m not sure whether the slowness is caused by the LLBLGen Pro or either of
+the System.Data.* assemblies, or maybe both. I just know that the same issue
+happened on Windows XP, Vista 64, using either Visual Studio 2005 and 2008.
+I&rsquo;ve just reinstalled Vista Ultimate on my T61p yesterday, and at the first
+full build it took 30 to 60 seconds, whereas it should take just a few
+seconds. Fortunately I already know how to solve this issue, but I hope anyone
+having the same issue can find the solution here.</p>
+
+<p>The most important hint came after enabling diagnostic build output (<em>Tools</em>
+menu, <em>Options</em>, <em>Projects and Solutions</em>, <em>Build and Run</em>, <em>MSBuild project
+build output verbosity</em> option). After setting this property to Diagnostic, on
+next build I found the following statistics:</p>
+
+<p>```text
+Task Performance Summary:</p>
+
+<pre><code>    0 ms  RemoveDuplicates                           2 calls
+    0 ms  GetDeviceFrameworkPath                     1 calls
+    0 ms  Message                                    5 calls
+    0 ms  AssignCulture                              1 calls
+    0 ms  FindAppConfigFile                          1 calls
+    0 ms  AssignTargetPath                          10 calls
+    0 ms  MakeDir                                    1 calls
+    0 ms  ResolveNonMSBuildProjectOutput             1 calls
+    0 ms  GetFrameworkPath                           1 calls
+    0 ms  Delete                                     1 calls
+    1 ms  CreateProperty                             1 calls
+    1 ms  ConvertToAbsolutePath                      1 calls
+    1 ms  ReadLinesFromFile                          1 calls
+   12 ms  Copy                                       6 calls
+   20 ms  FindUnderPath                              5 calls
+   32 ms  Csc                                        1 calls
+   47 ms  MSBuild                                    3 calls
+  110 ms  ResolveAssemblyReference                   1 calls
+18382 ms  PlatformVerificationTask                   1 calls
+</code></pre>
+
+<p>Build succeeded.</p>
+
+<p>Time Elapsed 00:00:18.64
+```</p>
+
+<p>So it looks like the build spends 18 seconds on the &ldquo;<em>Platform Verification
+Task</em>&rdquo;. A good explanation about what this task is can be found in <a href="http://blogs.msdn.com/vsdteam/archive/2006/09/15/756400.aspx">this blog
+post</a>, along
+with the solution (although I came to this blog post <strong>after</strong> I found the
+solution elsewhere). In fact I simply need to disable the platform
+verification task, by editing the <code>Microsoft.CompactFramework.common.targets</code>
+file in the <code>C:\Windows\Microsoft.NET\Framework\v3.5 folder</code>. Once the file is
+opened using your favorite text editor (mine is <a href="http://notepad-%0Aplus.sourceforge.net/">Notepad++</a>), locate the <code>&lt;target&gt;</code> tag having the <code>name</code> attribute set
+to <code>PlatformVerificationTask</code></p>
+
+<p>```xml
+&lt;Target</p>
+
+<pre><code>Name="PlatformVerificationTask"&gt;
+&lt;PlatformVerificationTask
+    PlatformFamilyName="$(PlatformFamilyName)"
+    PlatformID="$(PlatformID)"
+    SourceAssembly="@(IntermediateAssembly)"
+    ReferencePath="@(ReferencePath)"
+    TreatWarningsAsErrors="$(TreatWarningsAsErrors)"
+    PlatformVersion="$(TargetFrameworkVersion)"/&gt;
+</code></pre>
+
+<p></Target>
+```</p>
+
+<p>then add the <code>Condition</code> attribute to the <code>PlatformVerificationTask</code> tag as
+follows (the added line is the no. 4):</p>
+
+<p>```xml
+&lt;Target</p>
+
+<pre><code>Name="PlatformVerificationTask"&gt;  
+&lt;PlatformVerificationTask  
+    Condition="'$(DoPlatformVerificationTask)'=='true'" &lt;!-- Added --&gt;
+    PlatformFamilyName="$(PlatformFamilyName)"  
+    PlatformID="$(PlatformID)"  
+    SourceAssembly="@(IntermediateAssembly)"  
+    ReferencePath="@(ReferencePath)"  
+    TreatWarningsAsErrors="$(TreatWarningsAsErrors)"  
+    PlatformVersion="$(TargetFrameworkVersion)"/&gt;  
+</code></pre>
+
+<p></Target>
+```</p>
+
+<p>Last, save and restart Visual Studio. Now the PlatformVerificationTask is not
+reported in the build log any longer, but most important, a normal build takes
+less than a second and a rebuild just a couple of seconds.</p>
+
+<p>```text
+Task Performance Summary:</p>
+
+<pre><code>    0 ms  CreateProperty                             1 calls
+    0 ms  ResolveNonMSBuildProjectOutput             1 calls
+    0 ms  AssignTargetPath                          10 calls
+    0 ms  ConvertToAbsolutePath                      1 calls
+    0 ms  AssignCulture                              1 calls
+    0 ms  FindAppConfigFile                          1 calls
+    0 ms  Message                                    5 calls
+    0 ms  RemoveDuplicates                           2 calls
+    0 ms  Delete                                     1 calls
+    0 ms  MakeDir                                    1 calls
+    1 ms  GetDeviceFrameworkPath                     1 calls
+    1 ms  GetFrameworkPath                           1 calls
+    3 ms  Copy                                       6 calls
+    6 ms  ReadLinesFromFile                          1 calls
+   11 ms  FindUnderPath                              5 calls
+   33 ms  Csc                                        1 calls
+   53 ms  MSBuild                                    3 calls
+   75 ms  ResolveAssemblyReference                   1 calls
+</code></pre>
+
+<p>Build succeeded.</p>
+
+<p>Time Elapsed 00:00:00.22
+```</p>
+
+<h4>References</h4>
+
+<p>Visual Studio For Devices blog: <a href="http://blogs.msdn.com/vsdteam/archive/2006/09/15/756400.aspx">Platform Verification Task</a></p>
+]]></content>
+  </entry>
+  
+</feed>

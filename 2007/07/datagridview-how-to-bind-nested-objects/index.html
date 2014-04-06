@@ -1,0 +1,574 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>DataGridView: How to Bind Nested Objects - Developer's Corner</title>
+  <meta name="author" content="Antonio Bello">
+
+  
+  <meta name="description" content="DataGridView: how to bind nested objects">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://www.developer-corner.com/2007/07/datagridview-how-to-bind-nested-objects">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Developer's Corner" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-112847-3']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Developer's Corner</a></h1>
+  
+    <h2>by Antonio Bello</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:www.developer-corner.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/about">About</a></li>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">DataGridView: How to Bind Nested Objects</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+<time datetime="2007-07-19T06:49:00+02:00" pubdate data-updated="true">Jul 19<span>th</span>, 2007</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://www.developer-corner.com">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>The WinForms <code>DatagridView</code> control is not capable of handling nested properties, as it works with base data types only. But implementing such feature is not complicated. Let’s see how.</p>
+
+<!-- more -->
+
+
+<h3>The Problem</h3>
+
+<p>A <code>DataGridView</code> can be bound to a collection of objects to display any of its base data type (i.e. string, int, and so on) properties. For example, a collection of instances of the following class:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">Customer</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">public</span> <span class="kt">string</span> <span class="n">FirstName</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;}</span>
+</span><span class='line'>  <span class="k">public</span> <span class="kt">string</span> <span class="n">LastName</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;}</span>
+</span><span class='line'>  <span class="k">public</span> <span class="kt">string</span> <span class="n">Street</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;}</span>
+</span><span class='line'>  <span class="k">public</span> <span class="kt">string</span> <span class="n">PostalCode</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;}</span>
+</span><span class='line'>  <span class="k">public</span> <span class="kt">string</span> <span class="n">City</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>can be used to display any of the <code>Customer</code> class properties in the <code>DataGridView</code>.</p>
+
+<p>But what happens when the class exposes other objects which are not base data type? If an <code>Address</code> class is created and used as a property of the <code>Customer</code> class:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">Address</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">public</span> <span class="kt">string</span> <span class="n">Street</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;}</span>
+</span><span class='line'>  <span class="k">public</span> <span class="kt">string</span> <span class="n">PostalCode</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;}</span>
+</span><span class='line'>  <span class="k">public</span> <span class="kt">string</span> <span class="n">City</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">Customer</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">public</span> <span class="kt">string</span> <span class="n">FirstName</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;}</span>
+</span><span class='line'>  <span class="k">public</span> <span class="kt">string</span> <span class="n">LastName</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;}</span>
+</span><span class='line'>  <span class="k">public</span> <span class="n">Address</span> <span class="n">Address</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>a <code>DataGridView</code> bound to a collection of <code>Customer</code> instances is not able to display any of the <code>Address</code> properties. In such cases the displayed cells are empty.</p>
+
+<h3>The Solution</h3>
+
+<p>In order to enable the <code>DataGridView</code> to display properties exposed by class members, some custom development is required. The first step is to implement the <code>DataGridView</code>&rsquo;s <code>CellFormatting</code> event handler</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">private</span> <span class="k">void</span> <span class="nf">gridCustomers_CellFormatting</span><span class="p">(</span>
+</span><span class='line'>  <span class="kt">object</span> <span class="n">sender</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">DataGridViewCellFormattingEventArgs</span> <span class="n">e</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="p">...</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The <code>CellFormatting</code> event handler needs to differentiate whether the field to be displayed is one of the base data type or an object exposing its own properties. This is achieved by looking for the dot character &lsquo;.&rsquo; in the column&rsquo;s <code>DataPropertyName</code> field:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">private</span> <span class="k">void</span> <span class="nf">gridCustomers_CellFormatting</span><span class="p">(</span>
+</span><span class='line'>  <span class="kt">object</span> <span class="n">sender</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">DataGridViewCellFormattingEventArgs</span> <span class="n">e</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">((</span><span class="n">gridCustomers</span><span class="p">.</span><span class="n">Rows</span><span class="p">[</span><span class="n">e</span><span class="p">.</span><span class="n">RowIndex</span><span class="p">].</span><span class="n">DataBoundItem</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span> <span class="p">&amp;&amp;</span>
+</span><span class='line'>      <span class="p">(</span><span class="n">gridCustomers</span><span class="p">.</span><span class="n">Columns</span><span class="p">[</span><span class="n">e</span><span class="p">.</span><span class="n">ColumnIndex</span><span class="p">].</span><span class="n">DataPropertyName</span><span class="p">.</span><span class="n">Contains</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)))</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>    <span class="p">...</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If the <code>DataPropertyName</code> field doesn&rsquo;t contain a dot character, then the actual value of the base data type property must be displayed &ndash; in this case no action is required, since it is already filled in <code>e.Value</code>.</p>
+
+<p>On the other hand, if the <code>DataPropertyName</code> field contains one or more dot characters, then it points to a property exposed by one of the bound class properties. For example, <code>Address.Street</code> contains the dot character, and it points to the <code>Street</code> property of the <code>Address</code> property of a <code>Customer</code> instance. To handle this cases, a recursive function <code>BindProperty</code> is used:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">private</span> <span class="k">void</span> <span class="nf">gridCustomers_CellFormatting</span><span class="p">(</span>
+</span><span class='line'>  <span class="kt">object</span> <span class="n">sender</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">DataGridViewCellFormattingEventArgs</span> <span class="n">e</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">((</span><span class="n">gridCustomers</span><span class="p">.</span><span class="n">Rows</span><span class="p">[</span><span class="n">e</span><span class="p">.</span><span class="n">RowIndex</span><span class="p">].</span><span class="n">DataBoundItem</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span> <span class="p">&amp;&amp;</span>
+</span><span class='line'>      <span class="p">(</span><span class="n">gridCustomers</span><span class="p">.</span><span class="n">Columns</span><span class="p">[</span><span class="n">e</span><span class="p">.</span><span class="n">ColumnIndex</span><span class="p">].</span><span class="n">DataPropertyName</span><span class="p">.</span><span class="n">Contains</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)))</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>  <span class="n">e</span><span class="p">.</span><span class="n">Value</span> <span class="p">=</span> <span class="n">BindProperty</span><span class="p">(</span>
+</span><span class='line'>                <span class="n">gridCustomers</span><span class="p">.</span><span class="n">Rows</span><span class="p">[</span><span class="n">e</span><span class="p">.</span><span class="n">RowIndex</span><span class="p">].</span><span class="n">DataBoundItem</span><span class="p">,</span>
+</span><span class='line'>                <span class="n">gridCustomers</span><span class="p">.</span><span class="n">Columns</span><span class="p">[</span><span class="n">e</span><span class="p">.</span><span class="n">ColumnIndex</span><span class="p">].</span><span class="n">DataPropertyName</span>
+</span><span class='line'>              <span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The <code>BindProperty</code> function resolves the data property name and provides the actual value to be displayed in the grid cell by using reflection and (if required) recursion. Two arguments are passed to the <code>BindProperty</code> method: the class property value (which is an instance of a class, in the above example an instance of the <code>Address</code> class) and the <code>DataPropertyName</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">private</span> <span class="kt">string</span> <span class="nf">BindProperty</span><span class="p">(</span><span class="kt">object</span> <span class="n">property</span><span class="p">,</span> <span class="kt">string</span> <span class="n">propertyName</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="p">...</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The first thing to check is whether the property name contains the dot character &ndash; although this never happen when called directly from the <code>CellFormatting</code> event handler, since the if statement prevent this, it may happen when <code>BindProperty</code> calls itself recursively.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">private</span> <span class="kt">string</span> <span class="nf">BindProperty</span><span class="p">(</span><span class="kt">object</span> <span class="n">property</span><span class="p">,</span> <span class="kt">string</span> <span class="n">propertyName</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="n">propertyName</span><span class="p">.</span><span class="n">Contains</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">))</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>    <span class="p">...</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>    <span class="p">...</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If the property name doesn&rsquo;t contain any dot character, then the <code>propertyName</code> variable contains the name of the property object to be displayed in the grid.</p>
+
+<p>Reflection is used to read the property value, obtained by retrieving the <code>PropertyInfo</code> from the property variable, and then getting the property value by calling the <code>GetValue()</code> method of the <code>PropertyInfo</code> instance:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">private</span> <span class="kt">string</span> <span class="nf">BindProperty</span><span class="p">(</span><span class="kt">object</span> <span class="n">property</span><span class="p">,</span> <span class="kt">string</span> <span class="n">propertyName</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="kt">string</span> <span class="n">retValue</span> <span class="p">=</span> <span class="s">&quot;&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="n">propertyName</span><span class="p">.</span><span class="n">Contains</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">))</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>    <span class="p">...</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>    <span class="n">Type</span> <span class="n">propertyType</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">PropertyInfo</span> <span class="n">propertyInfo</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">propertyType</span> <span class="p">=</span> <span class="n">property</span><span class="p">.</span><span class="n">GetType</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">propertyInfo</span> <span class="p">=</span> <span class="n">propertyType</span><span class="p">.</span><span class="n">GetProperty</span><span class="p">(</span><span class="n">propertyName</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">retValue</span> <span class="p">=</span> <span class="n">propertyInfo</span><span class="p">.</span><span class="n">GetValue</span><span class="p">(</span><span class="n">property</span><span class="p">,</span> <span class="k">null</span><span class="p">).</span><span class="n">ToString</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This completes the else branch. As for the if branch, it is executed when the property name contains at least one dot character. In this case, still using reflection, the <code>PropertyInfo</code> of the desired property is retrieved, and using recursion, passed to the same <code>BindProperty</code> function.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">private</span> <span class="kt">string</span> <span class="nf">BindProperty</span><span class="p">(</span><span class="kt">object</span> <span class="n">property</span><span class="p">,</span> <span class="kt">string</span> <span class="n">propertyName</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="kt">string</span> <span class="n">retValue</span> <span class="p">=</span> <span class="s">&quot;&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="n">propertyName</span><span class="p">.</span><span class="n">Contains</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">))</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>    <span class="n">PropertyInfo</span><span class="p">[]</span> <span class="n">arrayProperties</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">string</span> <span class="n">leftPropertyName</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">leftPropertyName</span> <span class="p">=</span> <span class="n">propertyName</span><span class="p">.</span><span class="n">Substring</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="n">propertyName</span><span class="p">.</span><span class="n">IndexOf</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">));</span>
+</span><span class='line'>    <span class="n">arrayProperties</span> <span class="p">=</span> <span class="n">property</span><span class="p">.</span><span class="n">GetType</span><span class="p">().</span><span class="n">GetProperties</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">foreach</span> <span class="p">(</span><span class="n">PropertyInfo</span> <span class="n">propertyInfo</span> <span class="k">in</span> <span class="n">arrayProperties</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>      <span class="k">if</span> <span class="p">(</span><span class="n">propertyInfo</span><span class="p">.</span><span class="n">Name</span> <span class="p">==</span> <span class="n">leftPropertyName</span><span class="p">)</span>
+</span><span class='line'>      <span class="p">{</span>
+</span><span class='line'>        <span class="n">retValue</span> <span class="p">=</span> <span class="n">BindProperty</span><span class="p">(</span>
+</span><span class='line'>          <span class="n">propertyInfo</span><span class="p">.</span><span class="n">GetValue</span><span class="p">(</span><span class="n">property</span><span class="p">,</span> <span class="k">null</span><span class="p">),</span>
+</span><span class='line'>          <span class="n">propertyName</span><span class="p">.</span><span class="n">Substring</span><span class="p">(</span><span class="n">propertyName</span><span class="p">.</span><span class="n">IndexOf</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span> <span class="p">+</span> <span class="m">1</span><span class="p">));</span>
+</span><span class='line'>        <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>    <span class="n">Type</span> <span class="n">propertyType</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">PropertyInfo</span> <span class="n">propertyInfo</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">propertyType</span> <span class="p">=</span> <span class="n">property</span><span class="p">.</span><span class="n">GetType</span><span class="p">();</span>
+</span><span class='line'>    <span class="n">propertyInfo</span> <span class="p">=</span> <span class="n">propertyType</span><span class="p">.</span><span class="n">GetProperty</span><span class="p">(</span><span class="n">propertyName</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">retValue</span> <span class="p">=</span> <span class="n">propertyInfo</span><span class="p">.</span><span class="n">GetValue</span><span class="p">(</span><span class="n">property</span><span class="p">,</span> <span class="k">null</span><span class="p">).</span><span class="n">ToString</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">return</span> <span class="n">retValue</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The <code>leftPropertyName</code> variable holds the name of the leftmost property, for instance if <code>propertyName</code> is <code>Address.Street</code>, it is filled in with <code>Address</code>. By looping through the array of <code>PropertyInfo</code> of the property object, the <code>PropertyInfo</code> instance of the <code>leftPropertyName</code> property is retrieved. Then, <code>BindProperty</code> is called again, passing the instance of the <code>leftPropertyName</code> property and the right part of <code>propertyName</code> (for instance, in <code>Address.Street</code> the provided property name is <code>Street</code>).</p>
+
+<p>Souce code available on github:
+<a href="https://github.com/jeden/DataGridViewSample">DataGridViewSample</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Antonio Bello</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+<time datetime="2011-09-28T11:51:33+02:00" class="updated">Updated Sep 28<span>th</span>, 2011</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/c-number/'>c#</a>, <a class='category' href='/blog/categories/winforms/'>winforms</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://www.developer-corner.com/2007/07/datagridview-how-to-bind-nested-objects" data-via="ant_bello" data-counturl="http://www.developer-corner.com/2007/07/datagridview-how-to-bind-nested-objects" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2006/09/aspnet-single-sign-on" title="Previous Post: Single Sign On across multiple ASP.NET applications">&laquo; Single Sign On across multiple ASP.NET applications</a>
+      
+      
+        <a class="basic-alignment right" href="/2009/01/mark-c-class-data-member-as-readonly" title="Next Post: Mark a C# class data member as readonly when it’s read only">Mark a C# class data member as readonly when it’s read only &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2014/04/time-tracking-app-in-meteor">Creating a Time Tracking App With Meteor</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2011/06/cloning-dijit-widgets">Cloning Dijit Widgets</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2009/07/slow-build-on-compact-framework-projects">Slow Build on Compact Framework Projects</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2009/06/casting-from-base-to-derived-class">Casting From Base to Derived Class</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2009/02/choosing-web-color-scheme">Choosing a Web Color Scheme</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Antonio Bello -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'developer-corner';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

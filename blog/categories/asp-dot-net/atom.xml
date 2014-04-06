@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: asp.net | Developer's Corner]]></title>
+  <link href="http://www.developer-corner.com/blog/categories/asp-dot-net/atom.xml" rel="self"/>
+  <link href="http://www.developer-corner.com/"/>
+  <updated>2014-04-07T00:09:37+02:00</updated>
+  <id>http://www.developer-corner.com/</id>
+  <author>
+    <name><![CDATA[Antonio Bello]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Single Sign on Across Multiple ASP.NET Applications]]></title>
+    <link href="http://www.developer-corner.com/2006/09/aspnet-single-sign-on"/>
+    <updated>2006-10-01T05:42:00+02:00</updated>
+    <id>http://www.developer-corner.com/2006/09/aspnet-single-sign-on</id>
+    <content type="html"><![CDATA[<p>Single Sign On (SSO) is a term used to indicate when a pool of applications need a centralized authentication, so that users log in once and access to any application.</p>
+
+<p>Implementing a single sign on is pretty simple, and can be done by configuring the applications using the web.config file.</p>
+
+<!-- more -->
+
+
+<h3>Single Sign On</h3>
+
+<p>A default configuration for forms authentication is defined as follows:</p>
+
+<p>```xml
+<configuration>
+  &hellip;
+  &lt;system.web></p>
+
+<pre><code>... 
+&lt;authentication mode="Forms"&gt; 
+  &lt;forms name=".cookiename" 
+         loginUrl="~/Login.aspx" 
+         timeout="30" 
+         path="/" /&gt; 
+&lt;/authentication&gt; 
+... 
+</code></pre>
+
+<p>  &lt;/system.web>
+  &hellip;
+</configuration>
+```</p>
+
+<p>where <code>.cookiename</code>, by default, is <code>.ASPXFORMSAUTH</code>.</p>
+
+<p>In order for authentication data to be recognized across multiple applications, each application must be configured to use the same values for cookie name, protection and path attributes.</p>
+
+<p>But this isn&rsquo;t enough &ndash; in fact, applications must also have the same machine key values (read the <em>Machine Key</em> paragraph at the end of this article for more info about the <code>machineKey</code> element). This data are used to encrypt the
+forms authentication cookie, as mentioned in the <em>Forms Authentication</em> paragraph at the end of this article.</p>
+
+<p>Below a sample <code>web.config</code> excerpt which must be added to each application we want single sign on enabled. In this sample, the <code>validationKey</code> and <code>encryptionKey</code> attributes must be replaced with unique values you have to generate for your own application pool.</p>
+
+<p>```xml
+<configuration>
+  &hellip;
+  &lt;system.web></p>
+
+<pre><code>... 
+&lt;authentication mode="Forms"&gt; 
+  &lt;forms name=".cookiename" 
+         loginUrl="~/Login.aspx" 
+         timeout="30" 
+         path="/" 
+  /&gt; 
+&lt;/authentication&gt; 
+... 
+&lt;machineKey 
+   validationKey= 
+     "F9D1A2D3E1D3E2F7B3D9F90FF3965ABDAC304902" 
+  encryptionKey= 
+     "F9D1A2D3E1D3E2F7B3D9F90FF3965ABDAC304902F8D923AC" 
+  validation="SHA1" 
+/&gt; 
+... 
+</code></pre>
+
+<p>  &lt;/system.web>
+  &hellip;
+</configuration>
+```</p>
+
+<h3>Second and third level domains</h3>
+
+<p>If the cooperating applications are installed under the same 2nd and 3rd level domain, but on different virtual folders, then no additional code is required.</p>
+
+<p>If applications are installed on different second level domains
+(<code>www.domain1.com</code> and <code>www.domain2.com</code>), the SSO method described so far won&rsquo;t work, since cookies cannot be read by applications having different second level domains.</p>
+
+<p>For example, if application A in <code>domain1.com</code> issues a cookie, the cookie may be read by A itself and any application hosted under <code>www.domain1.com</code>, plus any other 3rd level domain (<code>test.domain1.com</code>, <code>beta.domain1.com</code>, and so forth).</p>
+
+<p>Application B in <code>domain2.com</code> isn&rsquo;t able to read the cookie, since it is hosted under a different second level domain.</p>
+
+<p>If cooperating applications are installed on different third level domains, then we need to add some code in order to make SSO work. The code simply has to add the domain name to the authentication cookie, as outlined below</p>
+
+<p>```csharp
+protected void Login (string strUserName, &hellip;)
+{
+  &hellip;
+  System.Web.HttpCookie cookie;</p>
+
+<p>  cookie = FormsAuthentication.GetAuthCookie(strUserName, false);
+  cookie.Domain = &ldquo;domain1.com&rdquo;;
+  cookie.Expires = DateTime.Now.AddDays (-1);
+  Response.AppendCookie (cookie);
+  &hellip;
+}
+```</p>
+
+<h3>Cookie Expiration</h3>
+
+<p>If different applications set different cookie expirations, the actual expiration value is the one set by the application which issued it. So if application A is configured to set an expiration of 1 hour and application B 2 hours, and the user signs in using application B, then the cookie expiration is set to 2 hours.</p>
+
+<h3>Logging out</h3>
+
+<p>Usually, in order to log out a user, a call to the <code>Authentication.SignOut()</code> method is used &ndash; this isn&rsquo;t enough when using SSO.</p>
+
+<p>In order to perform a single sign out, the quickest way is to set the cookie expiration to a past date &ndash; this ensures that the cookie won&rsquo;t be used by any application for authentication.</p>
+
+<p>```csharp
+protected void Logout (string strUserName)
+{
+  System.Web.HttpCookie cookie;</p>
+
+<p>  cookie = FormsAuthentication.GetAuthCookie(strUserName, false);
+  cookie.Domain = &ldquo;domain1.com&rdquo;;
+  cookie.Expires = DateTime.Now.AddDays (-1);
+  Response.AppendCookie (cookie);
+}
+```</p>
+
+<h3>Integrating Web Applications</h3>
+
+<p>What said so far is valid if applications use the same database to store user profiles. But what if 2 applications use each one their own database?</p>
+
+<p>In this case, the SSO works, but sooner or later one of the applications will throw exceptions due to missing data in its database.</p>
+
+<p>If a user registers in application A, once he signs in he can access to application B &ndash; but he never registered in application B, so application B doesn&rsquo;t have this user profile in its database.</p>
+
+<p>This is the case when, for example, we have to integrate 2 existing applications, which already have their own authentication and registration implemented.</p>
+
+<p>To solve this problem, we have 2 choices:</p>
+
+<ul>
+<li>modify both application in order to use a single authentication and registration process, and having a shared user profile repository</li>
+<li>choose one application as the master application, and remove the authentication and registration process from the other application (the slave application)</li>
+</ul>
+
+
+<p>We&rsquo;ll focus on the second solution.</p>
+
+<p>This method requires that the database used by slave applications is accessible by the master application. This can be achieved by either:</p>
+
+<ul>
+<li>Creating a single database which holds both application databases. In this case it would be good to use different prefixes for database entities to avoid naming conflicts &ndash; this could happen if both databases have a <code>Users</code> table. If we choose <code>mst</code> and <code>slv</code> as prefixes, we should rename the <code>Users</code> table to <code>mst_Users</code> for the master database and <code>slv_Users</code> for the slave database. This requires that we modify the source code and stored procedures.</li>
+<li>Using 2 different databases, but the master application must be able to access to the slave&rsquo;s database.</li>
+</ul>
+
+
+<p>Authentication should be performed in the following way:</p>
+
+<ul>
+<li>The user accesses to the master application, and signs in</li>
+<li>The master application verifies the user&rsquo;s credentials</li>
+<li>The master application verifies whether the logged user is defined in the slave database &ndash; if not, accesses to the slave&rsquo;s database and creates the new user</li>
+<li>The master application calls (if existing) a slave&rsquo;s stored procedure which performs post-authentication processing (such as setting a &ldquo;logged in&rdquo; field, inserting a new row in a history table, and so on)</li>
+<li>The master application generates the SSO cookie</li>
+</ul>
+
+
+<p>User profile creation on the slave database requires that:</p>
+
+<ul>
+<li>the master application is able to access to the slave&rsquo;s database</li>
+<li>the slave&rsquo;s database exposes a stored procedure which handles user registration (we may need to write it by ourselves)</li>
+</ul>
+
+
+<p>The second requirement isn&rsquo;t mandatory, since it could also be achieved by using inline SQL &ndash; but I usually prefer the stored procedure solution.</p>
+
+<h3>Final touch</h3>
+
+<p>There would be a few final things to do on the slave application:</p>
+
+<ul>
+<li>Removal of all login links</li>
+<li>Replacement of logout links with a &ldquo;Back to the Master application&rdquo; link</li>
+<li>Replacement of all &ldquo;User&rsquo;s profile&rdquo; links to point to the master application user&rsquo;s profile page</li>
+</ul>
+
+
+<p>These steps ensure that navigation is consistent with integration &ndash; we&rsquo;re supposing that all user&rsquo;s info (credentials, profile, user preferences) are handled by the master application, so we need to modify the slave application accordingly. It is responsibility of the master application to update the user profile in the slave application.</p>
+
+<h3>What if different cookies are used?</h3>
+
+<p>There may be cases where we want to keep authentication cookies separated from master and slaves applications. In this case we can&rsquo;t share the authentication cookie among cooperating applications.</p>
+
+<p>The solution is to create an authentication cookie for the slave application from within the master application.</p>
+
+<p>The code below creates an authentication cookie from the slave application:</p>
+
+<p>```csharp
+FormsAuthenticationTicket ticket;
+HttpCookie cookie;
+string cookiestr;</p>
+
+<p>ticket = new FormsAuthenticationTicket(</p>
+
+<pre><code>                   1, 
+                   userId, 
+                   DateTime.Now, 
+                   DateTime.Now.AddYears (120), 
+                   true, 
+                   "User Data", 
+                   "cookie_path" 
+       ); 
+</code></pre>
+
+<p>cookiestr = FormsAuthentication.Encrypt(ticket);
+cookie = new HttpCookie(&ldquo;cookie_name&rdquo;, cookiestr);
+cookie.Expires = ticket.Expiration;
+cookie.Path = &ldquo;cookie_path&rdquo;;</p>
+
+<p>Response.Cookies.Add(cookie);
+```</p>
+
+<h3>Forms Authentication Ticket</h3>
+
+<p>The <code>FormsAuthenticationTicket</code> class is used to create and read the values of a forms authentication cookie identifying an authenticated user.</p>
+
+<p>Forms authentication tickets must be encrypted using the <code>FormsAuthentication.Encrypt()</code> method before being issued as a cookie.</p>
+
+<p>More information about the  <code>FormsAuthenticationTicket</code> class can be found <a href="http://msdn2.microsoft.com/en-%0Aus/library/system.web.security.formsauthenticationticket.aspx">here</a>.</p>
+
+<p>The <code>FormsAuthenticationTicket</code>, as its name says, is a class used to generate authentication tickets (see the <em>Form Authentication</em> paragraph below). The code sample above shows that the following parameters are used to create the ticket:</p>
+
+<ul>
+<li>ticket version number</li>
+<li>user id</li>
+<li>date and time at which the ticket was generated</li>
+<li>ticket expiration</li>
+<li>whether creating a persistent cookie or limited to the current browser&rsquo;s session</li>
+<li>user specific data to be stored in the ticket (for example, this could be a user class/role)</li>
+<li>cookie path</li>
+</ul>
+
+
+<h1>Machine Key</h1>
+
+<p>The <code>machineKey</code> element of the <code>web.config</code> file is used to specify keys for encryption and decryption of forms authentication cookies and view state data, and also when dealing with out of process session state.</p>
+
+<p>The default configuration uses auto generated decryption key and validation key, and SHA1 encryption type. Using the default configuration, different web applications have different decryption and validation key, since they are randomly generated. To force 2 applications to use the same keys, they must be explicitly defined in the web.config file.</p>
+
+<p>A complete description of the machineKey element is available
+<a href="http://msdn2.microsoft.com/en-us/library/w8h3skw9.aspx">here</a></p>
+
+<h1>Form Authentication</h1>
+
+<p>Forms Authentication uses an authentication ticket stored in either a cookie or embedded in the url.</p>
+
+<p>When used in cookie mode, the cookie contains authentication data, encrypted so that data can be read by the application who has created the cookie.</p>
+
+<p>Cookies are associated to 2nd level domains (example.com), and can be accessed from any 3rd level domain (www.example.com, test.example.com, and so on).</p>
+
+<h3>References</h3>
+
+<p><a href="http://msdn2.microsoft.com/en-%0Aus/library/w8h3skw9.aspx">MSDN &ndash; machineKey element</a></p>
+
+<p><a href="http://msdn2.microsoft.com/en-%0Aus/library/system.web.security.formsauthenticationticket.aspx">MSDN &ndash; FormsAuthenticationTicket class</a></p>
+]]></content>
+  </entry>
+  
+</feed>

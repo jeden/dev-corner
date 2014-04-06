@@ -1,0 +1,525 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Casting From Base to Derived Class - Developer's Corner</title>
+  <meta name="author" content="Antonio Bello">
+
+  
+  <meta name="description" content="Casting from a base class to a derived class">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://www.developer-corner.com/2009/06/casting-from-base-to-derived-class">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Developer's Corner" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-112847-3']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Developer's Corner</a></h1>
+  
+    <h2>by Antonio Bello</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:www.developer-corner.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/about">About</a></li>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Casting From Base to Derived Class</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+<time datetime="2009-07-01T04:59:00+02:00" pubdate data-updated="true">Jul 1<span>st</span>, 2009</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://www.developer-corner.com">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Today a friend of mine asked me how to cast from <code>List&lt;&gt;</code> to a custom
+<code>MyCollection</code> class, where <code>MyCollection</code> is derived from <code>List&lt;&gt;</code>. Is this
+possible?</p>
+
+<!-- more -->
+
+
+<p>Let’s suppose we have the following class:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">MyClass</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="p">...</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>and we need a collection of instances of this class, for example using the
+generic <code>List&lt;&gt;</code> class</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="n">List</span><span class="p">&lt;</span><span class="n">MyClass</span><span class="p">&gt;</span> <span class="n">myCollection</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In order to improve readability, but also save time when writing code, we are
+often tempted to create a non-generic class implementing the list we need –
+even if we usually don’t really need such class</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">MyCollection</span> <span class="p">:</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">MyClass</span><span class="p">&gt;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The problem arises when we use both the generic version and the custom version
+of the list in our code, and more specifically when we create an instance
+using the generic list and we need to pass this instance to a method expecting
+the custom version of the list:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="c1">// This is the method we need to call</span>
+</span><span class='line'><span class="k">public</span> <span class="k">void</span> <span class="nf">DoSomething</span><span class="p">(</span><span class="n">MyCollection</span> <span class="n">myCollection</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="p">...</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">List</span><span class="p">&lt;</span><span class="n">MyClass</span><span class="p">&gt;</span> <span class="n">myClass</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">MyClass</span><span class="p">&gt;();</span>
+</span><span class='line'><span class="n">DoSomething</span><span class="p">(</span><span class="n">myClass</span><span class="p">);</span> <span class="c1">// This doesn&#39;t work</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The code above generates an error during compilation, whereas a direct cast
+from <code>List&lt;MyClass&gt;</code> to <code>MyCollection</code> generates a runtime exception:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="n">List</span><span class="p">&lt;</span><span class="n">MyClass</span><span class="p">&gt;</span> <span class="n">myList</span><span class="p">;</span>
+</span><span class='line'><span class="n">MyCollection</span> <span class="n">myCollection</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">myList</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">MyClass</span><span class="p">&gt;();</span>
+</span><span class='line'><span class="n">myCollection</span> <span class="p">=</span> <span class="p">(</span><span class="n">MyCollection</span><span class="p">)</span> <span class="n">myList</span><span class="p">;</span> <span class="c1">// This generates a runtime exception</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The problem is that <code>List&lt;MyClass&gt;</code> is a base class and <code>MyCollection</code> is a
+derived class, hence there is no way to explicitly perform the cast.</p>
+
+<p>Let’s forget about lists and generics for a moment. We have to classes:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">MyBaseClass</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="p">...</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">MyDerivedClass</span> <span class="p">:</span> <span class="n">MyBaseClass</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="p">...</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If I write the following code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="n">MyBaseClass</span> <span class="n">myBaseClass</span><span class="p">;</span>
+</span><span class='line'><span class="n">MyDerivedClass</span> <span class="n">myDerivedClass</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">myBaseClass</span> <span class="p">=</span> <span class="k">new</span> <span class="n">MyBaseClass</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">myDerivedClass</span> <span class="p">=</span> <span class="p">(</span><span class="n">MyDerivedClass</span><span class="p">)</span> <span class="n">myBaseClass</span><span class="p">;</span>    <span class="c1">// This generates a runtime exception</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The last statement obviously causes a runtime exception, as a downcast from a
+base class to a derived class cannot be done.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="err">`</span><span class="n">Unhandled</span> <span class="n">Exception</span><span class="p">:</span> <span class="n">System</span><span class="p">.</span><span class="n">InvalidCastException</span><span class="p">:</span> <span class="n">Unable</span> <span class="n">to</span> <span class="n">cast</span> <span class="kt">object</span> <span class="n">of</span>
+</span><span class='line'><span class="n">type</span> <span class="err">&#39;</span><span class="n">MyBaseClass</span><span class="err">&#39;</span> <span class="n">to</span> <span class="n">type</span> <span class="err">&#39;</span><span class="n">MyDerivedClass</span><span class="err">&#39;</span><span class="p">.</span>
+</span><span class='line'><span class="n">at</span> <span class="n">Program</span><span class="p">.</span><span class="n">Main</span><span class="p">()</span> <span class="err">`</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The reason is that a derived class (usually) extends the base class by adding
+more state objects (i.e. data members). When we create an instance of a base
+class, its data members are allocated in memory, but of course data
+members of inherited classes are not allocated. So, downcasting from a base to
+a derived class is not possible because data members of the inherited class
+are not allocated.</p>
+
+<p>But if we instantiate <code>MyBaseClass</code> as <code>MyDerivedClass</code> the cast is allowed – in
+other words downcasting is allowed only when the object to be cast is of the
+same type as the type it’s being cast to:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="n">myBaseClass</span> <span class="p">=</span> <span class="k">new</span> <span class="n">MyDerivedClass</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">myDerivedClass</span> <span class="p">=</span> <span class="p">(</span><span class="n">MyDerivedClass</span><span class="p">)</span> <span class="n">myBaseClass</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This because <code>myBaseClass</code>, although being a variable of type <code>MyBaseClass</code>, is a
+reference to an instance of <code>MyDerivedClass</code>.</p>
+
+<p>In our problem, <code>MyBaseClass</code> is <code>List&lt;MyClass&gt;</code> and <code>MyDerivedClass</code> is
+<code>MyCollection</code>, so we are trying to cast an instance of a base class to an
+instance of a derived class. It’s evident why the cast we want to do is not
+allowed.</p>
+
+<p>So, is there a solution? If we think in terms of casting, the answer is
+<strong>NO</strong>. What we can do is a conversion.</p>
+
+<p>The difference between cast and conversion is that the cast operates on the
+same object instance, whereas a conversion creates a new copy.</p>
+
+<p>We might think about implementing a conversion operator, either implicit or
+explicit, for instance:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">MyCollection</span> <span class="p">:</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">MyClass</span><span class="p">&gt;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">public</span> <span class="k">static</span> <span class="k">implicit</span> <span class="k">operator</span> <span class="nf">MyCollection</span><span class="p">(</span><span class="n">List</span><span class="p">&lt;</span><span class="n">MyClass</span><span class="p">&gt;</span> <span class="n">myClass</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="p">...</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="p">...</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>but it won’t work, as the compiler generates a <code>CS0553</code> error</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="p">&gt;</span> <span class="err">&#39;</span><span class="n">conversion</span> <span class="n">routine</span><span class="err">&#39;</span> <span class="p">:</span> <span class="n">user</span> <span class="n">defined</span> <span class="n">conversion</span> <span class="n">to</span><span class="p">/</span><span class="k">from</span> <span class="k">base</span> <span class="k">class</span>
+</span><span class='line'><span class="nc">User</span><span class="p">-</span><span class="n">defined</span> <span class="n">conversions</span> <span class="n">to</span> <span class="n">values</span> <span class="n">of</span> <span class="n">a</span> <span class="k">base</span> <span class="k">class</span> <span class="nc">are</span> <span class="n">not</span> <span class="n">allowed</span><span class="p">;</span> <span class="n">you</span> <span class="k">do</span> <span class="n">not</span>
+</span><span class='line'><span class="n">need</span> <span class="n">such</span> <span class="n">an</span> <span class="k">operator</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The reason why the compiler denies such conversion is that the explicit <em>cast
+operator</em> from a base to a derived class is automatically generated, and we
+can’t override it with a new <em>conversion operator</em>.</p>
+
+<p>The only viable solutions are either defining a copy constructor or
+implementing a method in the derived class which converts the base class to an
+instance of the derived class:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">MyCollection</span> <span class="p">:</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">MyClass</span><span class="p">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Copy constructor</span>
+</span><span class='line'>    <span class="k">public</span> <span class="nf">MyCollection</span><span class="p">(</span><span class="n">List</span><span class="p">&lt;</span><span class="n">MyClass</span><span class="p">&gt;</span> <span class="n">myList</span><span class="p">)</span> <span class="p">:</span> <span class="k">base</span> <span class="p">(</span><span class="n">myList</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="p">...</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Conversion method</span>
+</span><span class='line'>    <span class="k">public</span> <span class="k">static</span> <span class="n">MyCollection</span> <span class="nf">ToMyCollection</span><span class="p">(</span><span class="n">List</span><span class="p">&lt;</span><span class="n">MyClass</span><span class="p">&gt;</span> <span class="n">myList</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="p">...</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In both cases, anyway, the conversion implies the creation of a new instance
+of the object to be converted.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Antonio Bello</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+<time datetime="2011-06-09T11:59:28+02:00" class="updated">Updated Jun 9<span>th</span>, 2011</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/c-number/'>c#</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://www.developer-corner.com/2009/06/casting-from-base-to-derived-class" data-via="ant_bello" data-counturl="http://www.developer-corner.com/2009/06/casting-from-base-to-derived-class" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/2009/02/choosing-web-color-scheme" title="Previous Post: Choosing a web color scheme">&laquo; Choosing a web color scheme</a>
+      
+      
+        <a class="basic-alignment right" href="/2009/07/slow-build-on-compact-framework-projects" title="Next Post: Slow build on compact framework projects">Slow build on compact framework projects &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/2014/04/time-tracking-app-in-meteor">Creating a Time Tracking App With Meteor</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2011/06/cloning-dijit-widgets">Cloning Dijit Widgets</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2009/07/slow-build-on-compact-framework-projects">Slow Build on Compact Framework Projects</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2009/06/casting-from-base-to-derived-class">Casting From Base to Derived Class</a>
+      </li>
+    
+      <li class="post">
+        <a href="/2009/02/choosing-web-color-scheme">Choosing a Web Color Scheme</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Antonio Bello -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'developer-corner';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://www.developer-corner.com/2009/06/casting-from-base-to-derived-class';
+        var disqus_url = 'http://www.developer-corner.com/2009/06/casting-from-base-to-derived-class';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
