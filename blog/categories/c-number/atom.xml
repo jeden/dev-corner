@@ -4,7 +4,7 @@
   <title><![CDATA[Category: C# | Developer's Corner]]></title>
   <link href="http://www.developer-corner.com/blog/categories/c-number/atom.xml" rel="self"/>
   <link href="http://www.developer-corner.com/"/>
-  <updated>2014-04-07T00:15:07+02:00</updated>
+  <updated>2014-04-09T14:45:49+02:00</updated>
   <id>http://www.developer-corner.com/</id>
   <author>
     <name><![CDATA[Antonio Bello]]></name>
@@ -1067,7 +1067,7 @@ retValue = propertyInfo.GetValue(property, null).ToString();
     <link href="http://www.developer-corner.com/2006/09/aspnet-single-sign-on"/>
     <updated>2006-10-01T05:42:00+02:00</updated>
     <id>http://www.developer-corner.com/2006/09/aspnet-single-sign-on</id>
-    <content type="html"><![CDATA[<p>Single Sign On (SSO) is a term used to indicate when a pool of applications need a centralized authentication, so that users log in once and access to any application.</p>
+    <content type="html"><![CDATA[<p><strong>Single Sign On</strong> (SSO) is a term used to indicate when a pool of applications need a centralized authentication, so that users log in once and access to any application.</p>
 
 <p>Implementing a single sign on is pretty simple, and can be done by configuring the applications using the web.config file.</p>
 
