@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Winforms | Developer's Corner]]></title>
   <link href="http://www.developer-corner.com/blog/categories/winforms/atom.xml" rel="self"/>
   <link href="http://www.developer-corner.com/"/>
-  <updated>2014-04-14T08:45:50+02:00</updated>
+  <updated>2014-04-14T12:35:22+02:00</updated>
   <id>http://www.developer-corner.com/</id>
   <author>
     <name><![CDATA[Antonio Bello]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[DataGridView: How to Bind Nested Objects]]></title>
-    <link href="http://www.developer-corner.com/2007/07/datagridview-how-to-bind-nested-objects"/>
+    <link href="http://www.developer-corner.com/blog/2007/07/19/datagridview-how-to-bind-nested-objects/"/>
     <updated>2007-07-19T06:49:00+02:00</updated>
-    <id>http://www.developer-corner.com/2007/07/datagridview-how-to-bind-nested-objects</id>
+    <id>http://www.developer-corner.com/blog/2007/07/19/datagridview-how-to-bind-nested-objects</id>
     <content type="html"><![CDATA[<p>The WinForms <code>DatagridView</code> control is not capable of handling nested properties, as it works with base data types only. But implementing such feature is not complicated. Let’s see how.</p>
 
 <!-- more -->
@@ -203,7 +203,7 @@ foreach (PropertyInfo propertyInfo in arrayProperties)
   if (propertyInfo.Name == leftPropertyName)
   {
     retValue = BindProperty(
-      propertyInfo.GetValue(property, null), 
+      propertyInfo.GetValue(property, null),
       propertyName.Substring(propertyName.IndexOf(".") + 1));
     break;
   }

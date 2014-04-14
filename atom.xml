@@ -4,7 +4,7 @@
   <title><![CDATA[Developer's Corner]]></title>
   <link href="http://www.developer-corner.com/atom.xml" rel="self"/>
   <link href="http://www.developer-corner.com/"/>
-  <updated>2014-04-14T08:45:50+02:00</updated>
+  <updated>2014-04-14T12:35:22+02:00</updated>
   <id>http://www.developer-corner.com/</id>
   <author>
     <name><![CDATA[Antonio Bello]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[iOS User Interfaces: Storyboards vs. NIBs vs. Custom Code]]></title>
-    <link href="http://www.developer-corner.com/2014/04/09/ios-user-interfaces-storyboards-vs-nibs-vs-custom-code"/>
+    <link href="http://www.developer-corner.com/blog/2014/04/09/ios-user-interfaces-storyboards-vs-nibs-vs-custom-code/"/>
     <updated>2014-04-09T23:57:23+02:00</updated>
-    <id>http://www.developer-corner.com/2014/04/09/ios-user-interfaces-storyboards-vs-nibs-vs-custom-code</id>
+    <id>http://www.developer-corner.com/blog/2014/04/09/ios-user-interfaces-storyboards-vs-nibs-vs-custom-code</id>
     <content type="html"><![CDATA[<p>I often hear iOS developers ask some variant of the same key question:</p>
 
 <blockquote><p>What’s the best way to develop a UI in iOS: through Storyboards, NIBs, or code?</p></blockquote>
@@ -37,9 +37,9 @@
   
   <entry>
     <title type="html"><![CDATA[Cloning Dijit Widgets]]></title>
-    <link href="http://www.developer-corner.com/2011/06/cloning-dijit-widgets"/>
+    <link href="http://www.developer-corner.com/blog/2011/06/06/cloning-dijit-widgets/"/>
     <updated>2011-06-06T09:41:00+02:00</updated>
-    <id>http://www.developer-corner.com/2011/06/cloning-dijit-widgets</id>
+    <id>http://www.developer-corner.com/blog/2011/06/06/cloning-dijit-widgets</id>
     <content type="html"><![CDATA[<p>Dojox and Dijit widgets are undoubtedly cool, bringing a richer user
 experience to your web site.</p>
 
@@ -399,7 +399,7 @@ loading the dojo script:</p>
 </span><span class='line'>    <span class="c1">// Update the number of rows</span>
 </span><span class='line'>    <span class="nx">hRowsCounter</span><span class="p">.</span><span class="nx">val</span><span class="p">(</span><span class="nx">index</span><span class="p">);</span>
 </span><span class='line'>
-</span><span class='line'>    <span class="c1">// Force a dojo parsing of hte newly created row </span>
+</span><span class='line'>    <span class="c1">// Force a dojo parsing of hte newly created row</span>
 </span><span class='line'>    <span class="nx">dojo</span><span class="p">.</span><span class="nx">parser</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">dojo</span><span class="p">.</span><span class="nx">byId</span><span class="p">(</span><span class="nx">newRowId</span><span class="p">));</span>
 </span><span class='line'><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -435,9 +435,9 @@ control in the table has a unique id.</p>
   
   <entry>
     <title type="html"><![CDATA[Slow Build on Compact Framework Projects]]></title>
-    <link href="http://www.developer-corner.com/2009/07/slow-build-on-compact-framework-projects"/>
+    <link href="http://www.developer-corner.com/blog/2009/07/28/slow-build-on-compact-framework-projects/"/>
     <updated>2009-07-28T05:05:00+02:00</updated>
-    <id>http://www.developer-corner.com/2009/07/slow-build-on-compact-framework-projects</id>
+    <id>http://www.developer-corner.com/blog/2009/07/28/slow-build-on-compact-framework-projects</id>
     <content type="html"><![CDATA[<p>I&rsquo;ve been experiencing an extremely high build time on a windows mobile
 project targeted to compact framework 2.0 before finding out what was
 responsible of such slowness. Fortunately solving this problem is as easy as
@@ -643,9 +643,9 @@ less than a second and a rebuild just a couple of seconds.</p>
   
   <entry>
     <title type="html"><![CDATA[Casting From Base to Derived Class]]></title>
-    <link href="http://www.developer-corner.com/2009/06/casting-from-base-to-derived-class"/>
+    <link href="http://www.developer-corner.com/blog/2009/07/01/casting-from-base-to-derived-class/"/>
     <updated>2009-07-01T04:59:00+02:00</updated>
-    <id>http://www.developer-corner.com/2009/06/casting-from-base-to-derived-class</id>
+    <id>http://www.developer-corner.com/blog/2009/07/01/casting-from-base-to-derived-class</id>
     <content type="html"><![CDATA[<p>Today a friend of mine asked me how to cast from <code>List&lt;&gt;</code> to a custom
 <code>MyCollection</code> class, where <code>MyCollection</code> is derived from <code>List&lt;&gt;</code>. Is this
 possible?</p>
@@ -895,9 +895,9 @@ of the object to be converted.</p>
   
   <entry>
     <title type="html"><![CDATA[Choosing a Web Color Scheme]]></title>
-    <link href="http://www.developer-corner.com/2009/02/choosing-web-color-scheme"/>
+    <link href="http://www.developer-corner.com/blog/2009/02/07/choosing-web-color-scheme/"/>
     <updated>2009-02-07T15:26:00+01:00</updated>
-    <id>http://www.developer-corner.com/2009/02/choosing-web-color-scheme</id>
+    <id>http://www.developer-corner.com/blog/2009/02/07/choosing-web-color-scheme</id>
     <content type="html"><![CDATA[<p>When designing a web site, on of the problems I face with is how to choose colors. Usually I choose a base color, which is the predominant color used in the web design, but how to choose other colors, such as background, headings, panels, borders and so on?</p>
 
 <!-- more -->
@@ -1032,9 +1032,9 @@ of the object to be converted.</p>
   
   <entry>
     <title type="html"><![CDATA[Data Integrity Check Using Hashing]]></title>
-    <link href="http://www.developer-corner.com/2008/10/data-integrity-check-using-hashing"/>
+    <link href="http://www.developer-corner.com/blog/2008/11/01/data-integrity-check-using-hashing/"/>
     <updated>2008-11-01T18:19:00+01:00</updated>
-    <id>http://www.developer-corner.com/2008/10/data-integrity-check-using-hashing</id>
+    <id>http://www.developer-corner.com/blog/2008/11/01/data-integrity-check-using-hashing</id>
     <content type="html"><![CDATA[<p>When data is moved across a network, the recipient might require a verification to ensure that data has not been modified after send.</p>
 
 <p>For example, in a client/server scenario where a client application sends some updates to a remote database via a web service, the web service might need to verify whether the data has not been modified while travelling across the network, either due to corruption or because somebody changed it. A simple way to implement such kind of verification is utilizing <strong>hashing</strong>.</p>
@@ -1418,9 +1418,9 @@ In cryptography a key is used to encrypt and decrypt data – it’s not an algo
   
   <entry>
     <title type="html"><![CDATA[Mark a C# Class Data Member as Readonly When It’s Read Only]]></title>
-    <link href="http://www.developer-corner.com/2009/01/mark-c-class-data-member-as-readonly"/>
+    <link href="http://www.developer-corner.com/blog/2008/10/03/mark-c-class-data-member-as-readonly/"/>
     <updated>2008-10-03T03:50:00+02:00</updated>
-    <id>http://www.developer-corner.com/2009/01/mark-c-class-data-member-as-readonly</id>
+    <id>http://www.developer-corner.com/blog/2008/10/03/mark-c-class-data-member-as-readonly</id>
     <content type="html"><![CDATA[<p>The <code>readonly</code> modifier is used to declare an instance-specific constant data member which can be initialized in the class constructor and is not limited to compiler-time constants only, providing more flexibility than using the <code>const</code> modifier.</p>
 
 <!-- more -->
@@ -1758,12 +1758,12 @@ public rather than private.</p>
 </span><span class='line'>    <span class="n">MyClassWithReadonlyMember</span> <span class="n">classInstance</span><span class="p">;</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="c1">// Create an instance of MyClassWithReadOnlyMember class</span>
-</span><span class='line'>    <span class="c1">// The instance of MyClassType is initialized to the default </span>
+</span><span class='line'>    <span class="c1">// The instance of MyClassType is initialized to the default</span>
 </span><span class='line'>    <span class="c1">// value provided in the constructor</span>
 </span><span class='line'>    <span class="n">classInstance</span> <span class="p">=</span> <span class="k">new</span> <span class="n">MyClassWithReadonlyMember</span><span class="p">(</span><span class="s">&quot;Initial value&quot;</span><span class="p">);</span>
 </span><span class='line'>    <span class="n">classInstance</span><span class="p">.</span><span class="n">OutputStatus</span><span class="p">();</span>
 </span><span class='line'>
-</span><span class='line'>    <span class="c1">// The internal status of the readonly data member of </span>
+</span><span class='line'>    <span class="c1">// The internal status of the readonly data member of</span>
 </span><span class='line'>    <span class="c1">// MyClassWithReadonlyMember is changed</span>
 </span><span class='line'>    <span class="n">classInstance</span><span class="p">.</span><span class="n">SetStatus</span><span class="p">(</span><span class="s">&quot;New Value&quot;</span><span class="p">);</span>
 </span><span class='line'>    <span class="n">classInstance</span><span class="p">.</span><span class="n">OutputStatus</span><span class="p">();</span>
@@ -1771,8 +1771,6 @@ public rather than private.</p>
 </span><span class='line'><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
-
-<p></p>
 
 <p>If this code is compiled and run, it will generate the following output:</p>
 
@@ -1928,9 +1926,9 @@ fields are done at lines 9 and 11.</p>
   
   <entry>
     <title type="html"><![CDATA[DataGridView: How to Bind Nested Objects]]></title>
-    <link href="http://www.developer-corner.com/2007/07/datagridview-how-to-bind-nested-objects"/>
+    <link href="http://www.developer-corner.com/blog/2007/07/19/datagridview-how-to-bind-nested-objects/"/>
     <updated>2007-07-19T06:49:00+02:00</updated>
-    <id>http://www.developer-corner.com/2007/07/datagridview-how-to-bind-nested-objects</id>
+    <id>http://www.developer-corner.com/blog/2007/07/19/datagridview-how-to-bind-nested-objects</id>
     <content type="html"><![CDATA[<p>The WinForms <code>DatagridView</code> control is not capable of handling nested properties, as it works with base data types only. But implementing such feature is not complicated. Let’s see how.</p>
 
 <!-- more -->
@@ -2238,9 +2236,9 @@ fields are done at lines 9 and 11.</p>
   
   <entry>
     <title type="html"><![CDATA[Single Sign on Across Multiple ASP.NET Applications]]></title>
-    <link href="http://www.developer-corner.com/2006/09/aspnet-single-sign-on"/>
+    <link href="http://www.developer-corner.com/blog/2006/10/01/aspnet-single-sign-on/"/>
     <updated>2006-10-01T05:42:00+02:00</updated>
-    <id>http://www.developer-corner.com/2006/09/aspnet-single-sign-on</id>
+    <id>http://www.developer-corner.com/blog/2006/10/01/aspnet-single-sign-on</id>
     <content type="html"><![CDATA[<p><strong>Single Sign On</strong> (SSO) is a term used to indicate when a pool of applications need a centralized authentication, so that users log in once and access to any application.</p>
 
 <p>Implementing a single sign on is pretty simple, and can be done by configuring the applications using the web.config file.</p>

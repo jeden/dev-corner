@@ -4,7 +4,7 @@
   <title><![CDATA[Category: vs.net | Developer's Corner]]></title>
   <link href="http://www.developer-corner.com/blog/categories/vs-dot-net/atom.xml" rel="self"/>
   <link href="http://www.developer-corner.com/"/>
-  <updated>2014-04-14T08:45:50+02:00</updated>
+  <updated>2014-04-14T12:35:22+02:00</updated>
   <id>http://www.developer-corner.com/</id>
   <author>
     <name><![CDATA[Antonio Bello]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Slow Build on Compact Framework Projects]]></title>
-    <link href="http://www.developer-corner.com/2009/07/slow-build-on-compact-framework-projects"/>
+    <link href="http://www.developer-corner.com/blog/2009/07/28/slow-build-on-compact-framework-projects/"/>
     <updated>2009-07-28T05:05:00+02:00</updated>
-    <id>http://www.developer-corner.com/2009/07/slow-build-on-compact-framework-projects</id>
+    <id>http://www.developer-corner.com/blog/2009/07/28/slow-build-on-compact-framework-projects</id>
     <content type="html"><![CDATA[<p>I&rsquo;ve been experiencing an extremely high build time on a windows mobile
 project targeted to compact framework 2.0 before finding out what was
 responsible of such slowness. Fortunately solving this problem is as easy as

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Javascript | Developer's Corner]]></title>
   <link href="http://www.developer-corner.com/blog/categories/javascript/atom.xml" rel="self"/>
   <link href="http://www.developer-corner.com/"/>
-  <updated>2014-04-14T08:45:50+02:00</updated>
+  <updated>2014-04-14T12:35:22+02:00</updated>
   <id>http://www.developer-corner.com/</id>
   <author>
     <name><![CDATA[Antonio Bello]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Cloning Dijit Widgets]]></title>
-    <link href="http://www.developer-corner.com/2011/06/cloning-dijit-widgets"/>
+    <link href="http://www.developer-corner.com/blog/2011/06/06/cloning-dijit-widgets/"/>
     <updated>2011-06-06T09:41:00+02:00</updated>
-    <id>http://www.developer-corner.com/2011/06/cloning-dijit-widgets</id>
+    <id>http://www.developer-corner.com/blog/2011/06/06/cloning-dijit-widgets</id>
     <content type="html"><![CDATA[<p>Dojox and Dijit widgets are undoubtedly cool, bringing a richer user
 experience to your web site.</p>
 
@@ -265,7 +265,7 @@ newRow.find('input').each(function() {
 // Update the number of rows
 hRowsCounter.val(index);
 
-// Force a dojo parsing of hte newly created row 
+// Force a dojo parsing of hte newly created row
 dojo.parser.parse(dojo.byId(newRowId));
 </code></pre>
 

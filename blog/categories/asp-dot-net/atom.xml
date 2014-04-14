@@ -4,7 +4,7 @@
   <title><![CDATA[Category: asp.net | Developer's Corner]]></title>
   <link href="http://www.developer-corner.com/blog/categories/asp-dot-net/atom.xml" rel="self"/>
   <link href="http://www.developer-corner.com/"/>
-  <updated>2014-04-14T08:45:50+02:00</updated>
+  <updated>2014-04-14T12:35:22+02:00</updated>
   <id>http://www.developer-corner.com/</id>
   <author>
     <name><![CDATA[Antonio Bello]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Single Sign on Across Multiple ASP.NET Applications]]></title>
-    <link href="http://www.developer-corner.com/2006/09/aspnet-single-sign-on"/>
+    <link href="http://www.developer-corner.com/blog/2006/10/01/aspnet-single-sign-on/"/>
     <updated>2006-10-01T05:42:00+02:00</updated>
-    <id>http://www.developer-corner.com/2006/09/aspnet-single-sign-on</id>
+    <id>http://www.developer-corner.com/blog/2006/10/01/aspnet-single-sign-on</id>
     <content type="html"><![CDATA[<p><strong>Single Sign On</strong> (SSO) is a term used to indicate when a pool of applications need a centralized authentication, so that users log in once and access to any application.</p>
 
 <p>Implementing a single sign on is pretty simple, and can be done by configuring the applications using the web.config file.</p>
@@ -34,14 +34,14 @@
   &hellip;
   &lt;system.web></p>
 
-<pre><code>... 
-&lt;authentication mode="Forms"&gt; 
-  &lt;forms name=".cookiename" 
-         loginUrl="~/Login.aspx" 
-         timeout="30" 
-         path="/" /&gt; 
-&lt;/authentication&gt; 
-... 
+<pre><code>...
+&lt;authentication mode="Forms"&gt;
+  &lt;forms name=".cookiename"
+         loginUrl="~/Login.aspx"
+         timeout="30"
+         path="/" /&gt;
+&lt;/authentication&gt;
+...
 </code></pre>
 
 <p>  &lt;/system.web>
@@ -63,23 +63,23 @@ forms authentication cookie, as mentioned in the <em>Forms Authentication</em> p
   &hellip;
   &lt;system.web></p>
 
-<pre><code>... 
-&lt;authentication mode="Forms"&gt; 
-  &lt;forms name=".cookiename" 
-         loginUrl="~/Login.aspx" 
-         timeout="30" 
-         path="/" 
-  /&gt; 
-&lt;/authentication&gt; 
-... 
-&lt;machineKey 
-   validationKey= 
-     "F9D1A2D3E1D3E2F7B3D9F90FF3965ABDAC304902" 
-  encryptionKey= 
-     "F9D1A2D3E1D3E2F7B3D9F90FF3965ABDAC304902F8D923AC" 
-  validation="SHA1" 
-/&gt; 
-... 
+<pre><code>...
+&lt;authentication mode="Forms"&gt;
+  &lt;forms name=".cookiename"
+         loginUrl="~/Login.aspx"
+         timeout="30"
+         path="/"
+  /&gt;
+&lt;/authentication&gt;
+...
+&lt;machineKey
+   validationKey=
+     "F9D1A2D3E1D3E2F7B3D9F90FF3965ABDAC304902"
+  encryptionKey=
+     "F9D1A2D3E1D3E2F7B3D9F90FF3965ABDAC304902F8D923AC"
+  validation="SHA1"
+/&gt;
+...
 </code></pre>
 
 <p>  &lt;/system.web>
@@ -213,14 +213,14 @@ string cookiestr;</p>
 
 <p>ticket = new FormsAuthenticationTicket(</p>
 
-<pre><code>                   1, 
-                   userId, 
-                   DateTime.Now, 
-                   DateTime.Now.AddYears (120), 
-                   true, 
-                   "User Data", 
-                   "cookie_path" 
-       ); 
+<pre><code>                   1,
+                   userId,
+                   DateTime.Now,
+                   DateTime.Now.AddYears (120),
+                   true,
+                   "User Data",
+                   "cookie_path"
+       );
 </code></pre>
 
 <p>cookiestr = FormsAuthentication.Encrypt(ticket);

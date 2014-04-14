@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Webdesign | Developer's Corner]]></title>
   <link href="http://www.developer-corner.com/blog/categories/webdesign/atom.xml" rel="self"/>
   <link href="http://www.developer-corner.com/"/>
-  <updated>2014-04-14T08:45:50+02:00</updated>
+  <updated>2014-04-14T12:35:22+02:00</updated>
   <id>http://www.developer-corner.com/</id>
   <author>
     <name><![CDATA[Antonio Bello]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Choosing a Web Color Scheme]]></title>
-    <link href="http://www.developer-corner.com/2009/02/choosing-web-color-scheme"/>
+    <link href="http://www.developer-corner.com/blog/2009/02/07/choosing-web-color-scheme/"/>
     <updated>2009-02-07T15:26:00+01:00</updated>
-    <id>http://www.developer-corner.com/2009/02/choosing-web-color-scheme</id>
+    <id>http://www.developer-corner.com/blog/2009/02/07/choosing-web-color-scheme</id>
     <content type="html"><![CDATA[<p>When designing a web site, on of the problems I face with is how to choose colors. Usually I choose a base color, which is the predominant color used in the web design, but how to choose other colors, such as background, headings, panels, borders and so on?</p>
 
 <!-- more -->
