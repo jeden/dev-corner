@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Ios | Developer's Corner]]></title>
+  <link href="http://www.developer-corner.com/blog/categories/ios/atom.xml" rel="self"/>
+  <link href="http://www.developer-corner.com/"/>
+  <updated>2014-04-14T08:45:50+02:00</updated>
+  <id>http://www.developer-corner.com/</id>
+  <author>
+    <name><![CDATA[Antonio Bello]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[iOS User Interfaces: Storyboards vs. NIBs vs. Custom Code]]></title>
+    <link href="http://www.developer-corner.com/2014/04/09/ios-user-interfaces-storyboards-vs-nibs-vs-custom-code"/>
+    <updated>2014-04-09T23:57:23+02:00</updated>
+    <id>http://www.developer-corner.com/2014/04/09/ios-user-interfaces-storyboards-vs-nibs-vs-custom-code</id>
+    <content type="html"><![CDATA[<p>I often hear iOS developers ask some variant of the same key question:</p>
+
+<blockquote><p>What’s the best way to develop a UI in iOS: through Storyboards, NIBs, or code?</p></blockquote>
+
+<p>Answers to this question, explicitly or implicitly, tend to assume that there’s a mutually exclusive choice to be made, one that is often addressed upfront, before development.</p>
+
+<p>I’m of the opinion that the answer instead should take the form of one or more <em>counter</em> questions.</p>
+
+<!-- more -->
+
+
+<p style="text-align:center;"> <strong>This article is published at the <a href="http://www.toptal.com/ios/ios-user-interfaces-storyboards-vs-nibs-vs-custom-code">Toptal blog</a></strong></p>
+
+<p style="text-align:center;"> <strong><a href="http://www.toptal.com/?ref=5540">Toptal</a> is <em>a marketplace for top developers and top companies</em></strong></p>
+]]></content>
+  </entry>
+  
+</feed>
